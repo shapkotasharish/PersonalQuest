@@ -4,21 +4,93 @@ const ConstellationActivity = {
     ctx: null,
     stars: [],
     constellations: [],
-    currentConstellation: 0,
-    currentStar: 0,
     connections: [],
     completedConstellations: [],
     hintActive: false,
     animationFrame: null,
 
+    // Love-themed constellations with meaningful shapes
+    constellationShapes: [
+        {
+            name: 'Heart',
+            message: 'You Have My Heart',
+            // Heart shape points
+            points: [
+                [0.5, 0.35],   // top center dip
+                [0.35, 0.25],  // left top
+                [0.2, 0.35],   // left outer
+                [0.2, 0.5],    // left middle
+                [0.35, 0.7],   // left bottom
+                [0.5, 0.85],   // bottom point
+                [0.65, 0.7],   // right bottom
+                [0.8, 0.5],    // right middle
+                [0.8, 0.35],   // right outer
+                [0.65, 0.25],  // right top
+                [0.5, 0.35]    // back to top
+            ]
+        },
+        {
+            name: 'Infinity',
+            message: 'Forever & Always',
+            // Infinity symbol
+            points: [
+                [0.5, 0.5],    // center
+                [0.35, 0.4],   // left top
+                [0.2, 0.5],    // left outer
+                [0.35, 0.6],   // left bottom
+                [0.5, 0.5],    // center
+                [0.65, 0.4],   // right top
+                [0.8, 0.5],    // right outer
+                [0.65, 0.6],   // right bottom
+                [0.5, 0.5]     // back to center
+            ]
+        },
+        {
+            name: 'Two Stars',
+            message: 'You & Me',
+            // Two people/stars connected
+            points: [
+                [0.3, 0.3],    // left head
+                [0.3, 0.45],   // left body top
+                [0.2, 0.55],   // left arm out
+                [0.3, 0.45],   // back
+                [0.4, 0.55],   // left arm in (reaching)
+                [0.6, 0.55],   // right arm in (reaching)
+                [0.7, 0.45],   // right body top
+                [0.8, 0.55],   // right arm out
+                [0.7, 0.45],   // back
+                [0.7, 0.3],    // right head
+            ]
+        },
+        {
+            name: 'Rose',
+            message: 'My Love Blooms For You',
+            // Simple rose shape
+            points: [
+                [0.5, 0.25],   // top petal
+                [0.6, 0.35],   // right petal
+                [0.55, 0.45],  // right inner
+                [0.5, 0.4],    // center
+                [0.45, 0.45],  // left inner
+                [0.4, 0.35],   // left petal
+                [0.5, 0.25],   // back to top
+                [0.5, 0.4],    // center
+                [0.5, 0.75],   // stem bottom
+            ]
+        }
+    ],
+
     init(container) {
+        this.resetState();
+
         container.innerHTML = `
             <div class="constellation-container">
                 <canvas id="constellation-canvas"></canvas>
                 <button class="hint-btn" id="hint-btn" title="Get a hint">?</button>
                 <div class="constellation-progress" id="progress">
-                    Constellations: 0/${ConstellationData.length}
+                    Constellations: 0/4
                 </div>
+                <button class="reset-btn" id="reset-constellation" style="position: absolute; bottom: 20px; right: 20px;">Reset</button>
             </div>
         `;
 
@@ -31,6 +103,17 @@ const ConstellationActivity = {
         });
     },
 
+    resetState() {
+        this.stars = [];
+        this.constellations = [];
+        this.connections = [];
+        this.completedConstellations = [];
+        this.hintActive = false;
+        if (this.animationFrame) {
+            cancelAnimationFrame(this.animationFrame);
+        }
+    },
+
     showInstructions(callback) {
         const modal = document.getElementById('modal');
         const title = document.getElementById('modal-title');
@@ -39,12 +122,13 @@ const ConstellationActivity = {
 
         title.textContent = 'Constellation Connect';
         text.innerHTML = `
-            Connect the stars to form constellations and reveal messages about us!<br><br>
+            Connect the stars to form love symbols and reveal messages!<br><br>
             <strong>How to play:</strong><br>
-            • Click stars in sequence to connect them<br>
-            • Each constellation reveals a special message<br>
-            • Click the ? button for hints if you need help<br><br>
-            ✨ Let's find our stars together!
+            • Click on the <span style="color: #ffd700;">glowing stars</span> in sequence<br>
+            • Each constellation forms a meaningful symbol<br>
+            • Click the ? button if you need a hint<br>
+            • The first star pulses brighter - start there!<br><br>
+            ✨ Find our love written in the stars!
         `;
 
         modal.classList.remove('hidden');
@@ -63,7 +147,10 @@ const ConstellationActivity = {
         this.ctx = this.canvas.getContext('2d');
         this.resize();
 
-        window.addEventListener('resize', () => this.resize());
+        window.addEventListener('resize', () => {
+            this.resize();
+            this.repositionConstellations();
+        });
     },
 
     resize() {
@@ -72,13 +159,11 @@ const ConstellationActivity = {
     },
 
     generateStarfield() {
-        this.stars = [];
-
         // Background stars (decorative)
-        for (let i = 0; i < 300; i++) {
+        for (let i = 0; i < 200; i++) {
             this.stars.push({
                 x: Math.random() * this.canvas.width,
-                y: Math.random() * this.canvas.height,
+                y: Math.random() * this.canvas.height * 0.85,
                 size: 0.5 + Math.random() * 1.5,
                 twinkle: Math.random() * Math.PI * 2,
                 speed: 0.5 + Math.random() * 1.5,
@@ -90,28 +175,43 @@ const ConstellationActivity = {
     setupConstellations() {
         this.constellations = [];
 
-        ConstellationData.forEach((data, index) => {
-            const offsetX = (index % 2) * (this.canvas.width / 2) + this.canvas.width * 0.15;
-            const offsetY = Math.floor(index / 2) * (this.canvas.height / 2) + this.canvas.height * 0.15;
+        // Position constellations in quadrants
+        const positions = [
+            { x: 0.25, y: 0.3 },  // top-left
+            { x: 0.75, y: 0.3 },  // top-right
+            { x: 0.25, y: 0.65 }, // bottom-left
+            { x: 0.75, y: 0.65 }  // bottom-right
+        ];
+
+        this.constellationShapes.forEach((shape, index) => {
+            const pos = positions[index];
+            const scale = Math.min(this.canvas.width, this.canvas.height) * 0.25;
 
             const constellation = {
-                message: data.message,
+                name: shape.name,
+                message: shape.message,
                 stars: [],
-                completed: false
+                completed: false,
+                centerX: pos.x * this.canvas.width,
+                centerY: pos.y * this.canvas.height
             };
 
-            data.points.forEach((point, i) => {
+            shape.points.forEach((point, i) => {
                 const star = {
-                    x: offsetX + point[0] * 0.8,
-                    y: offsetY + point[1] * 0.6,
-                    size: 3,
+                    x: (pos.x - 0.15 + point[0] * 0.3) * this.canvas.width,
+                    y: (pos.y - 0.15 + point[1] * 0.3) * this.canvas.height,
+                    baseX: point[0],
+                    baseY: point[1],
+                    posIndex: index,
+                    size: 5,  // Larger for easier clicking
                     twinkle: Math.random() * Math.PI * 2,
                     speed: 1,
                     isConstellation: true,
                     constellationIndex: index,
                     starIndex: i,
                     connected: false,
-                    glow: 0
+                    glow: i === 0 ? 0.5 : 0,  // First star glows initially
+                    isFirstStar: i === 0
                 };
 
                 constellation.stars.push(star);
@@ -122,11 +222,51 @@ const ConstellationActivity = {
         });
     },
 
+    repositionConstellations() {
+        const positions = [
+            { x: 0.25, y: 0.3 },
+            { x: 0.75, y: 0.3 },
+            { x: 0.25, y: 0.65 },
+            { x: 0.75, y: 0.65 }
+        ];
+
+        this.constellations.forEach((constellation, index) => {
+            const pos = positions[index];
+            constellation.centerX = pos.x * this.canvas.width;
+            constellation.centerY = pos.y * this.canvas.height;
+
+            constellation.stars.forEach(star => {
+                star.x = (pos.x - 0.15 + star.baseX * 0.3) * this.canvas.width;
+                star.y = (pos.y - 0.15 + star.baseY * 0.3) * this.canvas.height;
+            });
+        });
+
+        // Update connections
+        this.connections.forEach(conn => {
+            const constellation = this.constellations[conn.constellationIndex];
+            const fromStar = constellation.stars[conn.fromIndex];
+            const toStar = constellation.stars[conn.toIndex];
+            if (fromStar && toStar) {
+                conn.from = { x: fromStar.x, y: fromStar.y };
+                conn.to = { x: toStar.x, y: toStar.y };
+            }
+        });
+    },
+
     attachListeners() {
         this.canvas.addEventListener('click', (e) => this.handleClick(e));
 
         document.getElementById('hint-btn').addEventListener('click', () => {
             this.showHint();
+        });
+
+        document.getElementById('reset-constellation').addEventListener('click', () => {
+            this.resetState();
+            this.generateStarfield();
+            this.setupConstellations();
+            this.animate();
+            document.querySelectorAll('.constellation-message').forEach(el => el.remove());
+            document.getElementById('progress').textContent = 'Constellations: 0/4';
         });
     },
 
@@ -135,7 +275,10 @@ const ConstellationActivity = {
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
 
-        // Find if we clicked on a constellation star
+        // Find clicked constellation star (larger hit area)
+        let closestStar = null;
+        let closestDist = 35; // Larger click radius
+
         for (const star of this.stars) {
             if (!star.isConstellation) continue;
 
@@ -143,10 +286,14 @@ const ConstellationActivity = {
             const dy = star.y - y;
             const dist = Math.sqrt(dx * dx + dy * dy);
 
-            if (dist < 20) {
-                this.selectStar(star);
-                return;
+            if (dist < closestDist) {
+                closestDist = dist;
+                closestStar = star;
             }
+        }
+
+        if (closestStar) {
+            this.selectStar(closestStar);
         }
     },
 
@@ -154,8 +301,10 @@ const ConstellationActivity = {
         const constellation = this.constellations[star.constellationIndex];
         if (constellation.completed) return;
 
+        const expectedIndex = this.getCurrentStarIndex(star.constellationIndex);
+
         // Check if this is the correct next star
-        if (star.starIndex === this.getCurrentStarIndex(star.constellationIndex)) {
+        if (star.starIndex === expectedIndex) {
             AudioManager.playEffect('hit');
             star.connected = true;
             star.glow = 1;
@@ -166,20 +315,29 @@ const ConstellationActivity = {
                 this.connections.push({
                     from: { x: prevStar.x, y: prevStar.y },
                     to: { x: star.x, y: star.y },
+                    fromIndex: star.starIndex - 1,
+                    toIndex: star.starIndex,
                     alpha: 0,
                     constellationIndex: star.constellationIndex
                 });
+            }
+
+            // Highlight next star
+            const nextIndex = star.starIndex + 1;
+            if (nextIndex < constellation.stars.length) {
+                constellation.stars[nextIndex].glow = 0.5;
             }
 
             // Check if constellation is complete
             if (star.starIndex === constellation.stars.length - 1) {
                 this.completeConstellation(star.constellationIndex);
             }
-        } else if (!star.connected) {
-            // Wrong star - gentle feedback
-            star.glow = 0.5;
+        } else {
+            // Wrong star - gentle pulse feedback
+            star.glow = 0.7;
+            AudioManager.playEffect('click');
             setTimeout(() => {
-                if (!star.connected) star.glow = 0;
+                if (!star.connected) star.glow = star.isFirstStar && expectedIndex === 0 ? 0.5 : 0;
             }, 300);
         }
     },
@@ -201,28 +359,27 @@ const ConstellationActivity = {
 
         AudioManager.playEffect('success');
 
-        // Show message
-        const centerX = constellation.stars.reduce((sum, s) => sum + s.x, 0) / constellation.stars.length;
-        const centerY = constellation.stars.reduce((sum, s) => sum + s.y, 0) / constellation.stars.length;
-
+        // Show message near constellation
         const messageEl = document.createElement('div');
         messageEl.className = 'constellation-message';
-        messageEl.textContent = constellation.message;
-        messageEl.style.left = centerX + 'px';
-        messageEl.style.top = (centerY + 50) + 'px';
+        messageEl.innerHTML = `<strong>${constellation.name}</strong><br>${constellation.message}`;
+        messageEl.style.left = constellation.centerX + 'px';
+        messageEl.style.top = (constellation.centerY + 80) + 'px';
         document.querySelector('.constellation-container').appendChild(messageEl);
 
         // Update progress
         document.getElementById('progress').textContent =
-            `Constellations: ${this.completedConstellations.length}/${this.constellations.length}`;
+            `Constellations: ${this.completedConstellations.length}/4`;
 
         // Check if all complete
-        if (this.completedConstellations.length === this.constellations.length) {
+        if (this.completedConstellations.length === 4) {
             setTimeout(() => this.completeActivity(), 2000);
         }
     },
 
     showHint() {
+        AudioManager.playEffect('click');
+
         // Find the next star to click in any incomplete constellation
         for (let i = 0; i < this.constellations.length; i++) {
             const constellation = this.constellations[i];
@@ -232,14 +389,17 @@ const ConstellationActivity = {
             if (nextIndex >= 0) {
                 const star = constellation.stars[nextIndex];
                 star.glow = 1;
+
+                // Also highlight with a special effect
                 this.hintActive = true;
 
                 setTimeout(() => {
                     this.hintActive = false;
-                    if (!star.connected) star.glow = 0;
-                }, 2000);
+                    if (!star.connected) {
+                        star.glow = star.isFirstStar ? 0.5 : 0;
+                    }
+                }, 3000);
 
-                AudioManager.playEffect('click');
                 return;
             }
         }
@@ -252,20 +412,21 @@ const ConstellationActivity = {
 
         // Draw gradient background
         const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
-        gradient.addColorStop(0, '#0f0c29');
-        gradient.addColorStop(0.5, '#1a1a3e');
+        gradient.addColorStop(0, '#0a0520');
+        gradient.addColorStop(0.3, '#0f0c29');
+        gradient.addColorStop(0.6, '#1a1a3e');
         gradient.addColorStop(1, '#2d1b4e');
         this.ctx.fillStyle = gradient;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Draw mountain silhouette at bottom
-        this.ctx.fillStyle = '#1a1a2e';
+        // Draw subtle horizon
+        this.ctx.fillStyle = '#15102a';
         this.ctx.beginPath();
         this.ctx.moveTo(0, this.canvas.height);
-        this.ctx.lineTo(0, this.canvas.height * 0.85);
+        this.ctx.lineTo(0, this.canvas.height * 0.88);
 
-        for (let x = 0; x < this.canvas.width; x += 50) {
-            const y = this.canvas.height * 0.85 + Math.sin(x * 0.01) * 30 + Math.sin(x * 0.02) * 20;
+        for (let x = 0; x < this.canvas.width; x += 30) {
+            const y = this.canvas.height * 0.88 + Math.sin(x * 0.008) * 15 + Math.sin(x * 0.015) * 10;
             this.ctx.lineTo(x, y);
         }
 
@@ -275,39 +436,58 @@ const ConstellationActivity = {
 
         // Draw connection lines
         this.connections.forEach(conn => {
-            conn.alpha = Math.min(1, conn.alpha + 0.05);
+            conn.alpha = Math.min(1, conn.alpha + 0.03);
 
+            // Glow
             this.ctx.beginPath();
             this.ctx.moveTo(conn.from.x, conn.from.y);
             this.ctx.lineTo(conn.to.x, conn.to.y);
-            this.ctx.strokeStyle = `rgba(255, 215, 0, ${conn.alpha * 0.8})`;
-            this.ctx.lineWidth = 2;
+            this.ctx.strokeStyle = `rgba(255, 215, 0, ${conn.alpha * 0.3})`;
+            this.ctx.lineWidth = 8;
+            this.ctx.lineCap = 'round';
             this.ctx.stroke();
 
-            // Glow effect
-            this.ctx.strokeStyle = `rgba(255, 215, 0, ${conn.alpha * 0.3})`;
-            this.ctx.lineWidth = 6;
+            // Main line
+            this.ctx.strokeStyle = `rgba(255, 215, 0, ${conn.alpha * 0.9})`;
+            this.ctx.lineWidth = 2;
             this.ctx.stroke();
         });
 
         // Draw stars
         this.stars.forEach(star => {
-            const twinkle = 0.5 + 0.5 * Math.sin(time * star.speed + star.twinkle);
+            const twinkle = 0.6 + 0.4 * Math.sin(time * star.speed + star.twinkle);
 
             if (star.isConstellation) {
-                // Constellation stars are brighter and can glow
-                const baseSize = star.connected ? star.size * 1.5 : star.size;
-                const glowSize = star.glow * 15;
+                const constellation = this.constellations[star.constellationIndex];
+                if (constellation.completed && !star.connected) return;
 
-                // Glow effect
-                if (star.glow > 0 || star.connected) {
+                // Larger, more visible constellation stars
+                let baseSize = star.size;
+                let glowAmount = star.glow;
+
+                // Pulse effect for first unconnected star
+                if (!star.connected && this.getCurrentStarIndex(star.constellationIndex) === star.starIndex) {
+                    glowAmount = 0.5 + 0.3 * Math.sin(time * 3);
+                }
+
+                const glowSize = glowAmount * 25;
+
+                // Outer glow
+                if (glowAmount > 0 || star.connected) {
                     const glowGradient = this.ctx.createRadialGradient(
                         star.x, star.y, 0,
                         star.x, star.y, baseSize + glowSize
                     );
-                    glowGradient.addColorStop(0, star.connected ? 'rgba(255, 215, 0, 0.8)' : 'rgba(255, 107, 157, 0.8)');
-                    glowGradient.addColorStop(0.5, star.connected ? 'rgba(255, 215, 0, 0.3)' : 'rgba(255, 107, 157, 0.3)');
-                    glowGradient.addColorStop(1, 'transparent');
+
+                    if (star.connected) {
+                        glowGradient.addColorStop(0, 'rgba(255, 215, 0, 0.9)');
+                        glowGradient.addColorStop(0.4, 'rgba(255, 215, 0, 0.4)');
+                        glowGradient.addColorStop(1, 'transparent');
+                    } else {
+                        glowGradient.addColorStop(0, 'rgba(255, 107, 157, 0.8)');
+                        glowGradient.addColorStop(0.4, 'rgba(255, 107, 157, 0.3)');
+                        glowGradient.addColorStop(1, 'transparent');
+                    }
 
                     this.ctx.beginPath();
                     this.ctx.arc(star.x, star.y, baseSize + glowSize, 0, Math.PI * 2);
@@ -315,18 +495,34 @@ const ConstellationActivity = {
                     this.ctx.fill();
                 }
 
-                // Star itself
+                // Star body
                 this.ctx.beginPath();
                 this.ctx.arc(star.x, star.y, baseSize * twinkle, 0, Math.PI * 2);
-                this.ctx.fillStyle = star.connected ? '#ffd700' : '#fff';
+                this.ctx.fillStyle = star.connected ? '#ffd700' : '#ffffff';
+                this.ctx.fill();
+
+                // Inner highlight
+                this.ctx.beginPath();
+                this.ctx.arc(star.x - 1, star.y - 1, baseSize * 0.3, 0, Math.PI * 2);
+                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
                 this.ctx.fill();
 
             } else {
                 // Background stars
                 this.ctx.beginPath();
                 this.ctx.arc(star.x, star.y, star.size * twinkle, 0, Math.PI * 2);
-                this.ctx.fillStyle = `rgba(255, 255, 255, ${0.3 + twinkle * 0.7})`;
+                this.ctx.fillStyle = `rgba(255, 255, 255, ${0.2 + twinkle * 0.5})`;
                 this.ctx.fill();
+            }
+        });
+
+        // Draw constellation names for incomplete ones
+        this.constellations.forEach((constellation, index) => {
+            if (!constellation.completed) {
+                this.ctx.font = '14px Poppins';
+                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText(constellation.name, constellation.centerX, constellation.centerY - 60);
             }
         });
 
@@ -347,7 +543,7 @@ const ConstellationActivity = {
                 <p class="pieces-earned">${isNew ? 'You earned 5 puzzle pieces!' : 'Activity completed!'}</p>
                 <div style="margin: 30px 0; color: var(--warm-pink);">
                     <p style="font-family: 'Dancing Script', cursive; font-size: 1.5rem;">
-                        Every star reminds me of you
+                        Our love is written in the stars
                     </p>
                 </div>
                 <button class="action-btn" id="back-to-menu">Back to Menu</button>

@@ -1,4 +1,4 @@
-// Rhythm of Us Activity
+// Rhythm of Us Activity - Guitar Hero style gameplay
 const RhythmActivity = {
     canvas: null,
     ctx: null,
@@ -15,26 +15,41 @@ const RhythmActivity = {
     misses: 0,
     notes: [],
     spawnedNotes: [],
-    hitZoneY: 0,
-    lastNoteTime: 0,
     animationFrame: null,
+    startTime: 0,
+    gameTime: 0,
+    keyStates: { a: false, d: false },
+    keyFlash: { a: 0, d: 0 },
+
+    // Lane positions
+    laneA: 0,
+    laneD: 0,
+
+    // Hit zone
+    hitZoneY: 0,
+
+    // Note speed (pixels per second)
+    noteSpeed: 400,
 
     // Timing windows (ms)
     timings: {
-        perfect: 100,
-        good: 200,
-        okay: 300
+        perfect: 80,
+        good: 150,
+        okay: 250
     },
 
     init(container) {
+        this.selectedSong = null;
+        this.mode = 'solo';
+
         container.innerHTML = `
             <div class="rhythm-container">
                 <div class="song-selection" id="song-selection">
                     <h2>Choose Your Song</h2>
                     <div class="song-list" id="song-list"></div>
                     <div style="margin-top: 30px; display: flex; gap: 20px;">
-                        <button class="action-btn" id="solo-btn" disabled>Solo Mode</button>
-                        <button class="action-btn" id="duet-btn" disabled>Duet Mode</button>
+                        <button class="action-btn" id="solo-btn" disabled>Solo Mode (A & D keys)</button>
+                        <button class="action-btn" id="duet-btn" disabled>Duet Mode (A vs D)</button>
                     </div>
                 </div>
             </div>
@@ -90,9 +105,11 @@ const RhythmActivity = {
                 e.stopPropagation();
                 const song = SongData[btn.dataset.index];
 
+                // Stop any current preview
+                document.querySelectorAll('.preview-btn').forEach(b => b.textContent = 'Preview');
+
                 if (this.audio) {
                     AudioManager.stop();
-                    btn.textContent = 'Preview';
                     this.audio = null;
                     return;
                 }
@@ -131,15 +148,19 @@ const RhythmActivity = {
 
         container.innerHTML = `
             <div class="rhythm-container">
-                <div class="rhythm-game">
+                <div class="rhythm-game" id="rhythm-game">
                     <div class="rhythm-header">
                         <div class="score-display">Score: <span id="score">0</span></div>
                         <div class="combo-display">Combo: <span id="combo">x0</span></div>
                     </div>
                     <canvas id="rhythm-canvas"></canvas>
+                    <div id="hit-feedback-container"></div>
                 </div>
+                <button class="reset-btn rhythm-reset" id="rhythm-reset-btn">Restart Song</button>
             </div>
         `;
+
+        document.getElementById('rhythm-reset-btn').addEventListener('click', () => this.restartSong());
 
         this.showInstructions(() => {
             this.setupCanvas();
@@ -160,10 +181,11 @@ const RhythmActivity = {
             Feel the rhythm of our song together!<br><br>
             <strong>How to play:</strong><br>
             ${this.mode === 'solo' ?
-                '• Press SPACEBAR when notes reach the hit zone' :
-                '• Player 1: Press D | Player 2: Press K'}<br>
-            • Perfect timing = more points!<br>
-            • Build combos for bonus points<br><br>
+                '• Press <strong>A</strong> for left lane, <strong>D</strong> for right lane<br>• Hit notes when they reach the target zone!' :
+                '• Player 1: Press <strong>A</strong> key for your notes<br>• Player 2: Press <strong>D</strong> key for your notes<br>• Work together!'}<br><br>
+            • <span style="color: #ffd700;">Perfect</span> = 300 pts<br>
+            • <span style="color: #ff6b9d;">Good</span> = 200 pts<br>
+            • <span style="color: #aaa;">Okay</span> = 100 pts<br><br>
             🎵 Let's make music together!
         `;
 
@@ -184,52 +206,101 @@ const RhythmActivity = {
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
 
+        // Calculate lane positions
+        const centerX = this.canvas.width / 2;
+        const laneSpacing = 120;
+
+        this.laneA = centerX - laneSpacing / 2;
+        this.laneD = centerX + laneSpacing / 2;
+
+        // Hit zone near the bottom
         this.hitZoneY = this.canvas.height - 150;
+
+        window.addEventListener('resize', () => {
+            this.canvas.width = window.innerWidth;
+            this.canvas.height = window.innerHeight;
+            const centerX = this.canvas.width / 2;
+            this.laneA = centerX - laneSpacing / 2;
+            this.laneD = centerX + laneSpacing / 2;
+            this.hitZoneY = this.canvas.height - 150;
+        });
     },
 
     generateNotes() {
         this.notes = [];
+        this.spawnedNotes = [];
 
-        // Generate notes based on BPM estimation (roughly every 0.5-1 second)
-        const duration = 180; // 3 minutes max
-        const noteInterval = this.mode === 'solo' ? 0.6 : 0.4;
+        // Generate notes based on song duration and BPM approximation
+        // Use a pattern-based approach for better gameplay
+        const duration = 120; // 2 minutes worth of notes
+        const bpm = 120; // Approximate BPM
+        const beatInterval = 60000 / bpm; // ms per beat
 
-        for (let time = 3; time < duration; time += noteInterval + Math.random() * 0.4) {
-            if (this.mode === 'solo') {
+        let time = 2000; // Start after 2 seconds
+        let patternIndex = 0;
+
+        // Define some patterns for variety
+        const patterns = [
+            ['a'], ['d'], ['a'], ['d'],  // Alternating
+            ['a', 'd'], // Both together (only in solo mode or sync moment)
+            ['a'], ['a'], ['d'], ['d'],  // Doubles
+            ['d'], ['a'], ['d'], ['a'],  // Reverse alternating
+        ];
+
+        while (time < duration * 1000) {
+            const pattern = patterns[patternIndex % patterns.length];
+
+            pattern.forEach((lane, i) => {
+                if (this.mode === 'duet' && pattern.length > 1) {
+                    // In duet mode, split simultaneous notes between players
+                    if (i === 0) lane = 'a';
+                    else lane = 'd';
+                }
+
                 this.notes.push({
-                    time: time * 1000,
-                    lane: 0,
+                    time: time + i * 50, // Slight offset for simultaneous notes
+                    lane: lane,
                     hit: false,
-                    missed: false
+                    missed: false,
+                    y: -50 // Start above screen
                 });
-            } else {
-                // Duet mode - alternate lanes with some combined notes
-                const lane = Math.random() > 0.7 ? 2 : (Math.random() > 0.5 ? 0 : 1);
-                this.notes.push({
-                    time: time * 1000,
-                    lane, // 0 = player 1, 1 = player 2, 2 = both
-                    hit: false,
-                    missed: false
-                });
+            });
+
+            // Vary the timing for musical feel
+            const variation = Math.random() * 0.4 + 0.8; // 0.8 to 1.2 multiplier
+            time += beatInterval * variation;
+
+            // Sometimes skip a beat for variety
+            if (Math.random() < 0.15) {
+                time += beatInterval * 0.5;
             }
+
+            patternIndex++;
         }
     },
 
     attachControls() {
-        document.addEventListener('keydown', (e) => {
+        this.keydownHandler = (e) => {
             if (e.repeat) return;
 
-            if (this.mode === 'solo' && e.code === 'Space') {
+            const key = e.key.toLowerCase();
+            if (key === 'a' || key === 'd') {
                 e.preventDefault();
-                this.handleHit(0);
-            } else if (this.mode === 'duet') {
-                if (e.key.toLowerCase() === 'd') {
-                    this.handleHit(0);
-                } else if (e.key.toLowerCase() === 'k') {
-                    this.handleHit(1);
-                }
+                this.keyStates[key] = true;
+                this.keyFlash[key] = 1;
+                this.handleHit(key);
             }
-        });
+        };
+
+        this.keyupHandler = (e) => {
+            const key = e.key.toLowerCase();
+            if (key === 'a' || key === 'd') {
+                this.keyStates[key] = false;
+            }
+        };
+
+        document.addEventListener('keydown', this.keydownHandler);
+        document.addEventListener('keyup', this.keyupHandler);
     },
 
     async startPlaying() {
@@ -241,34 +312,43 @@ const RhythmActivity = {
         this.goodHits = 0;
         this.okayHits = 0;
         this.misses = 0;
-        this.spawnedNotes = [];
+        this.startTime = performance.now();
+        this.gameTime = 0;
 
-        this.audio = await AudioManager.play(this.selectedSong.file);
+        // Start audio with a small delay for sync
+        setTimeout(async () => {
+            this.audio = await AudioManager.play(this.selectedSong.file);
 
-        if (this.audio) {
-            this.audio.addEventListener('ended', () => {
-                this.endGame();
-            });
-        }
+            if (this.audio) {
+                this.audio.addEventListener('ended', () => {
+                    setTimeout(() => this.endGame(), 1000);
+                });
+            }
+        }, 500);
 
         this.animate();
     },
 
-    handleHit(playerLane) {
-        const currentTime = AudioManager.getCurrentTime() * 1000;
+    handleHit(key) {
+        if (!this.playing) return;
 
-        // Find the closest unhit note in the hit window
+        // In duet mode, each player can only hit their lane
+        if (this.mode === 'duet') {
+            // Player 1 = A, Player 2 = D
+            // Each can only hit their own notes
+        }
+
+        // Find the closest unhit note in the player's lane
         let closestNote = null;
         let closestDiff = Infinity;
 
         for (const note of this.spawnedNotes) {
             if (note.hit || note.missed) continue;
+            if (note.lane !== key) continue;
 
-            // Check lane (for duet mode)
-            if (this.mode === 'duet' && note.lane !== 2 && note.lane !== playerLane) continue;
-
-            const expectedHitTime = note.time;
-            const diff = Math.abs(currentTime - expectedHitTime);
+            // Calculate time difference based on note position vs hit zone
+            const noteHitTime = this.getNoteHitTime(note);
+            const diff = Math.abs(this.gameTime - noteHitTime);
 
             if (diff < closestDiff && diff < this.timings.okay) {
                 closestDiff = diff;
@@ -284,17 +364,14 @@ const RhythmActivity = {
                 hitType = 'perfect';
                 this.score += 300 * (1 + this.combo * 0.1);
                 this.perfectHits++;
-                AudioManager.playEffect('perfect');
             } else if (closestDiff <= this.timings.good) {
                 hitType = 'good';
                 this.score += 200 * (1 + this.combo * 0.1);
                 this.goodHits++;
-                AudioManager.playEffect('hit');
             } else {
                 hitType = 'okay';
                 this.score += 100 * (1 + this.combo * 0.1);
                 this.okayHits++;
-                AudioManager.playEffect('click');
             }
 
             this.combo++;
@@ -305,80 +382,196 @@ const RhythmActivity = {
         }
     },
 
+    getNoteHitTime(note) {
+        return note.time;
+    },
+
     showHitFeedback(type, note) {
+        const laneX = note.lane === 'a' ? this.laneA : this.laneD;
+
         const feedback = document.createElement('div');
         feedback.className = `hit-feedback ${type}`;
         feedback.textContent = type.toUpperCase() + '!';
-
-        const laneX = this.getLaneX(note.lane);
         feedback.style.left = laneX + 'px';
-        feedback.style.top = (this.hitZoneY - 50) + 'px';
+        feedback.style.top = (this.hitZoneY - 80) + 'px';
 
-        document.querySelector('.rhythm-game').appendChild(feedback);
+        const container = document.getElementById('hit-feedback-container');
+        if (container) {
+            container.appendChild(feedback);
+            setTimeout(() => feedback.remove(), 500);
+        }
 
-        setTimeout(() => feedback.remove(), 500);
+        // Create burst effect
+        this.createHitBurst(laneX, this.hitZoneY, type);
     },
 
-    getLaneX(lane) {
-        if (this.mode === 'solo') {
-            return this.canvas.width / 2;
-        } else {
-            if (lane === 2) return this.canvas.width / 2;
-            return lane === 0 ? this.canvas.width / 3 : (this.canvas.width * 2) / 3;
-        }
+    createHitBurst(x, y, type) {
+        // Visual burst effect drawn in next frame
+        if (!this.hitBursts) this.hitBursts = [];
+        this.hitBursts.push({
+            x, y,
+            type,
+            time: 0,
+            maxTime: 300
+        });
     },
 
     updateUI() {
-        document.getElementById('score').textContent = Math.round(this.score);
-        document.getElementById('combo').textContent = 'x' + this.combo;
+        const scoreEl = document.getElementById('score');
+        const comboEl = document.getElementById('combo');
+        if (scoreEl) scoreEl.textContent = Math.round(this.score);
+        if (comboEl) comboEl.textContent = 'x' + this.combo;
     },
 
     draw() {
-        const currentTime = AudioManager.getCurrentTime() * 1000;
-        const avgFreq = AudioManager.getAverageFrequency();
+        const ctx = this.ctx;
 
         // Clear canvas
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Dynamic background based on audio
-        const intensity = avgFreq / 255;
-        const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
-        gradient.addColorStop(0, `rgba(45, 27, 78, ${0.8 + intensity * 0.2})`);
-        gradient.addColorStop(0.5, `rgba(255, 107, 157, ${0.1 + intensity * 0.2})`);
-        gradient.addColorStop(1, `rgba(26, 26, 62, ${0.8 + intensity * 0.2})`);
-        this.ctx.fillStyle = gradient;
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        // Background gradient
+        const gradient = ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+        gradient.addColorStop(0, '#1a0a2e');
+        gradient.addColorStop(0.5, '#2d1b4e');
+        gradient.addColorStop(1, '#1a0a2e');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Draw lanes
-        if (this.mode === 'solo') {
-            this.drawLane(this.canvas.width / 2, '#ff6b9d');
-        } else {
-            this.drawLane(this.canvas.width / 3, '#ff6b9d');
-            this.drawLane((this.canvas.width * 2) / 3, '#ffd700');
-        }
+        // Draw highway/lane background
+        this.drawLaneBackground();
 
         // Draw hit zone
-        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-        this.ctx.lineWidth = 3;
-        this.ctx.beginPath();
-        this.ctx.moveTo(0, this.hitZoneY);
-        this.ctx.lineTo(this.canvas.width, this.hitZoneY);
-        this.ctx.stroke();
+        this.drawHitZone();
 
-        // Spawn and update notes
+        // Update and draw notes
+        this.updateNotes();
+        this.drawNotes();
+
+        // Draw hit bursts
+        this.drawHitBursts();
+
+        // Draw key indicators
+        this.drawKeyIndicators();
+
+        // Draw combo effect
+        if (this.combo >= 10) {
+            this.drawComboEffect();
+        }
+
+        // Draw mode indicator
+        this.drawModeIndicator();
+    },
+
+    drawLaneBackground() {
+        const ctx = this.ctx;
+        const laneWidth = 80;
+
+        // Lane A (left)
+        const gradientA = ctx.createLinearGradient(this.laneA - laneWidth/2, 0, this.laneA + laneWidth/2, 0);
+        gradientA.addColorStop(0, 'rgba(255, 107, 157, 0.05)');
+        gradientA.addColorStop(0.5, 'rgba(255, 107, 157, 0.15)');
+        gradientA.addColorStop(1, 'rgba(255, 107, 157, 0.05)');
+        ctx.fillStyle = gradientA;
+        ctx.fillRect(this.laneA - laneWidth/2, 0, laneWidth, this.canvas.height);
+
+        // Lane D (right)
+        const gradientD = ctx.createLinearGradient(this.laneD - laneWidth/2, 0, this.laneD + laneWidth/2, 0);
+        gradientD.addColorStop(0, 'rgba(255, 215, 0, 0.05)');
+        gradientD.addColorStop(0.5, 'rgba(255, 215, 0, 0.15)');
+        gradientD.addColorStop(1, 'rgba(255, 215, 0, 0.05)');
+        ctx.fillStyle = gradientD;
+        ctx.fillRect(this.laneD - laneWidth/2, 0, laneWidth, this.canvas.height);
+
+        // Lane dividers
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([10, 10]);
+
+        ctx.beginPath();
+        ctx.moveTo(this.laneA - laneWidth/2, 0);
+        ctx.lineTo(this.laneA - laneWidth/2, this.canvas.height);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(this.laneA + laneWidth/2, 0);
+        ctx.lineTo(this.laneA + laneWidth/2, this.canvas.height);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(this.laneD + laneWidth/2, 0);
+        ctx.lineTo(this.laneD + laneWidth/2, this.canvas.height);
+        ctx.stroke();
+
+        ctx.setLineDash([]);
+    },
+
+    drawHitZone() {
+        const ctx = this.ctx;
+
+        // Hit zone line
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(this.laneA - 60, this.hitZoneY);
+        ctx.lineTo(this.laneD + 60, this.hitZoneY);
+        ctx.stroke();
+
+        // Hit zone circles
+        const flashA = this.keyFlash.a;
+        const flashD = this.keyFlash.d;
+
+        // Lane A hit zone
+        ctx.beginPath();
+        ctx.arc(this.laneA, this.hitZoneY, 35 + flashA * 10, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(255, 107, 157, ${0.5 + flashA * 0.5})`;
+        ctx.lineWidth = 4 + flashA * 2;
+        ctx.stroke();
+
+        if (flashA > 0) {
+            ctx.beginPath();
+            ctx.arc(this.laneA, this.hitZoneY, 35, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255, 107, 157, ${flashA * 0.3})`;
+            ctx.fill();
+        }
+
+        // Lane D hit zone
+        ctx.beginPath();
+        ctx.arc(this.laneD, this.hitZoneY, 35 + flashD * 10, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(255, 215, 0, ${0.5 + flashD * 0.5})`;
+        ctx.lineWidth = 4 + flashD * 2;
+        ctx.stroke();
+
+        if (flashD > 0) {
+            ctx.beginPath();
+            ctx.arc(this.laneD, this.hitZoneY, 35, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255, 215, 0, ${flashD * 0.3})`;
+            ctx.fill();
+        }
+
+        // Decay flash
+        this.keyFlash.a = Math.max(0, this.keyFlash.a - 0.1);
+        this.keyFlash.d = Math.max(0, this.keyFlash.d - 0.1);
+    },
+
+    updateNotes() {
+        const approachTime = 2000; // Time for note to travel from top to hit zone
+
+        // Spawn notes that are approaching
         for (const note of this.notes) {
-            // Spawn note if it's time
-            if (!this.spawnedNotes.includes(note) && note.time - currentTime < 3000 && note.time > currentTime - 500) {
-                this.spawnedNotes.push(note);
+            if (!this.spawnedNotes.includes(note)) {
+                const timeUntilHit = note.time - this.gameTime;
+                if (timeUntilHit <= approachTime && timeUntilHit > -500) {
+                    this.spawnedNotes.push(note);
+                }
             }
         }
 
-        // Draw spawned notes
+        // Update note positions and check for misses
         for (const note of this.spawnedNotes) {
             if (note.hit || note.missed) continue;
 
-            const timeUntilHit = note.time - currentTime;
-            const noteY = this.hitZoneY - (timeUntilHit / 3000) * (this.hitZoneY - 100);
+            const timeUntilHit = note.time - this.gameTime;
+            note.y = this.hitZoneY - (timeUntilHit / approachTime) * this.hitZoneY;
 
             // Check if missed
             if (timeUntilHit < -this.timings.okay) {
@@ -386,79 +579,205 @@ const RhythmActivity = {
                 this.combo = 0;
                 this.misses++;
                 this.updateUI();
-                continue;
             }
-
-            const laneX = this.getLaneX(note.lane);
-
-            // Note glow
-            const glowGradient = this.ctx.createRadialGradient(laneX, noteY, 0, laneX, noteY, 30);
-            glowGradient.addColorStop(0, note.lane === 1 ? 'rgba(255, 215, 0, 0.6)' :
-                                          note.lane === 2 ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 107, 157, 0.6)');
-            glowGradient.addColorStop(1, 'transparent');
-            this.ctx.fillStyle = glowGradient;
-            this.ctx.beginPath();
-            this.ctx.arc(laneX, noteY, 30, 0, Math.PI * 2);
-            this.ctx.fill();
-
-            // Note circle
-            this.ctx.beginPath();
-            this.ctx.arc(laneX, noteY, 20, 0, Math.PI * 2);
-            this.ctx.fillStyle = note.lane === 1 ? '#ffd700' :
-                                 note.lane === 2 ? '#fff' : '#ff6b9d';
-            this.ctx.fill();
-
-            // Note inner glow
-            this.ctx.beginPath();
-            this.ctx.arc(laneX, noteY, 10, 0, Math.PI * 2);
-            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-            this.ctx.fill();
-        }
-
-        // Draw controls hint
-        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-        this.ctx.font = '16px Poppins';
-        this.ctx.textAlign = 'center';
-
-        if (this.mode === 'solo') {
-            this.ctx.fillText('SPACE', this.canvas.width / 2, this.hitZoneY + 40);
-        } else {
-            this.ctx.fillText('D', this.canvas.width / 3, this.hitZoneY + 40);
-            this.ctx.fillText('K', (this.canvas.width * 2) / 3, this.hitZoneY + 40);
-        }
-
-        // Combo effect
-        if (this.combo >= 10) {
-            const pulseSize = 1 + Math.sin(performance.now() / 200) * 0.1;
-            this.ctx.font = `${60 * pulseSize}px Dancing Script`;
-            this.ctx.fillStyle = `rgba(255, 215, 0, ${0.5 + Math.sin(performance.now() / 300) * 0.3})`;
-            this.ctx.textAlign = 'center';
-            this.ctx.fillText(`x${this.combo}`, this.canvas.width / 2, this.canvas.height / 2);
         }
     },
 
-    drawLane(x, color) {
-        // Lane line
-        this.ctx.strokeStyle = color + '40';
-        this.ctx.lineWidth = 60;
-        this.ctx.beginPath();
-        this.ctx.moveTo(x, 0);
-        this.ctx.lineTo(x, this.canvas.height);
-        this.ctx.stroke();
+    drawNotes() {
+        const ctx = this.ctx;
 
-        // Hit zone highlight
-        this.ctx.strokeStyle = color;
-        this.ctx.lineWidth = 4;
-        this.ctx.beginPath();
-        this.ctx.arc(x, this.hitZoneY, 30, 0, Math.PI * 2);
-        this.ctx.stroke();
+        for (const note of this.spawnedNotes) {
+            if (note.hit) {
+                // Draw hit effect
+                continue;
+            }
+            if (note.missed) {
+                // Briefly show missed note fading out
+                if (note.y < this.canvas.height + 50) {
+                    ctx.globalAlpha = Math.max(0, 1 - (note.y - this.hitZoneY) / 100);
+                    this.drawNote(note, true);
+                    ctx.globalAlpha = 1;
+                }
+                continue;
+            }
+
+            this.drawNote(note, false);
+        }
+    },
+
+    drawNote(note, missed) {
+        const ctx = this.ctx;
+        const x = note.lane === 'a' ? this.laneA : this.laneD;
+        const y = note.y;
+        const color = note.lane === 'a' ? '#ff6b9d' : '#ffd700';
+        const radius = 25;
+
+        if (missed) {
+            // Missed note - show X
+            ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+            ctx.font = '30px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('✕', x, y);
+            return;
+        }
+
+        // Glow effect
+        const glowGradient = ctx.createRadialGradient(x, y, 0, x, y, radius * 2);
+        glowGradient.addColorStop(0, color + '80');
+        glowGradient.addColorStop(1, 'transparent');
+        ctx.fillStyle = glowGradient;
+        ctx.beginPath();
+        ctx.arc(x, y, radius * 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Note body
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+
+        // Note shine
+        ctx.beginPath();
+        ctx.arc(x - 5, y - 5, radius * 0.4, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.fill();
+
+        // Note label
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 16px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(note.lane.toUpperCase(), x, y);
+    },
+
+    drawHitBursts() {
+        if (!this.hitBursts) return;
+
+        const ctx = this.ctx;
+        const now = performance.now();
+
+        this.hitBursts = this.hitBursts.filter(burst => {
+            burst.time += 16; // Approximate frame time
+            const progress = burst.time / burst.maxTime;
+
+            if (progress >= 1) return false;
+
+            const color = burst.type === 'perfect' ? '#ffd700' :
+                          burst.type === 'good' ? '#ff6b9d' : '#aaaaaa';
+
+            // Expanding ring
+            ctx.beginPath();
+            ctx.arc(burst.x, burst.y, 30 + progress * 50, 0, Math.PI * 2);
+            ctx.strokeStyle = color;
+            ctx.globalAlpha = 1 - progress;
+            ctx.lineWidth = 4 * (1 - progress);
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+
+            // Particles
+            for (let i = 0; i < 8; i++) {
+                const angle = (i / 8) * Math.PI * 2;
+                const dist = progress * 60;
+                const px = burst.x + Math.cos(angle) * dist;
+                const py = burst.y + Math.sin(angle) * dist;
+
+                ctx.beginPath();
+                ctx.arc(px, py, 3 * (1 - progress), 0, Math.PI * 2);
+                ctx.fillStyle = color;
+                ctx.globalAlpha = 1 - progress;
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+
+            return true;
+        });
+    },
+
+    drawKeyIndicators() {
+        const ctx = this.ctx;
+        const y = this.hitZoneY + 60;
+
+        // Key A indicator
+        ctx.fillStyle = this.keyStates.a ? '#ff6b9d' : 'rgba(255, 107, 157, 0.3)';
+        ctx.font = 'bold 24px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('A', this.laneA, y);
+
+        // Key D indicator
+        ctx.fillStyle = this.keyStates.d ? '#ffd700' : 'rgba(255, 215, 0, 0.3)';
+        ctx.fillText('D', this.laneD, y);
+
+        // Mode-specific labels
+        if (this.mode === 'duet') {
+            ctx.font = '14px Poppins';
+            ctx.fillStyle = 'rgba(255, 107, 157, 0.7)';
+            ctx.fillText('Player 1', this.laneA, y + 25);
+            ctx.fillStyle = 'rgba(255, 215, 0, 0.7)';
+            ctx.fillText('Player 2', this.laneD, y + 25);
+        }
+    },
+
+    drawComboEffect() {
+        const ctx = this.ctx;
+        const pulseSize = 1 + Math.sin(performance.now() / 200) * 0.1;
+
+        ctx.font = `${50 * pulseSize}px Dancing Script`;
+        ctx.fillStyle = `rgba(255, 215, 0, ${0.4 + Math.sin(performance.now() / 300) * 0.2})`;
+        ctx.textAlign = 'center';
+        ctx.fillText(`x${this.combo}`, this.canvas.width / 2, this.canvas.height / 2 - 50);
+
+        if (this.combo >= 25) {
+            ctx.font = '20px Poppins';
+            ctx.fillStyle = 'rgba(255, 107, 157, 0.8)';
+            ctx.fillText('On Fire!', this.canvas.width / 2, this.canvas.height / 2);
+        }
+    },
+
+    drawModeIndicator() {
+        const ctx = this.ctx;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.font = '14px Poppins';
+        ctx.textAlign = 'center';
+        ctx.fillText(
+            this.mode === 'solo' ? 'Solo Mode' : 'Duet Mode',
+            this.canvas.width / 2,
+            30
+        );
     },
 
     animate() {
         if (!this.playing) return;
 
+        this.gameTime = performance.now() - this.startTime - 500; // Account for audio start delay
         this.draw();
         this.animationFrame = requestAnimationFrame(() => this.animate());
+    },
+
+    restartSong() {
+        AudioManager.stop();
+        this.playing = false;
+        cancelAnimationFrame(this.animationFrame);
+
+        // Reset state
+        this.score = 0;
+        this.combo = 0;
+        this.maxCombo = 0;
+        this.perfectHits = 0;
+        this.goodHits = 0;
+        this.okayHits = 0;
+        this.misses = 0;
+        this.notes.forEach(note => {
+            note.hit = false;
+            note.missed = false;
+            note.y = -50;
+        });
+        this.spawnedNotes = [];
+        this.hitBursts = [];
+        this.updateUI();
+
+        // Restart
+        this.startPlaying();
     },
 
     endGame() {
@@ -493,7 +812,7 @@ const RhythmActivity = {
                         <span class="stat-label">Accuracy</span>
                     </div>
                     <div class="stat">
-                        <span class="stat-value">${this.perfectHits}</span>
+                        <span class="stat-value" style="color: #ffd700;">${this.perfectHits}</span>
                         <span class="stat-label">Perfect</span>
                     </div>
                     <div class="stat">
@@ -531,8 +850,15 @@ const RhythmActivity = {
         if (this.animationFrame) {
             cancelAnimationFrame(this.animationFrame);
         }
+        if (this.keydownHandler) {
+            document.removeEventListener('keydown', this.keydownHandler);
+        }
+        if (this.keyupHandler) {
+            document.removeEventListener('keyup', this.keyupHandler);
+        }
         AudioManager.stop();
         this.notes = [];
         this.spawnedNotes = [];
+        this.hitBursts = [];
     }
 };

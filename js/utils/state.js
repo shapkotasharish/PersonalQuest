@@ -9,6 +9,7 @@ const GameState = {
     },
     puzzle: {
         collected: 0,
+        unlocked: [], // Array of unlocked piece indices
         placed: [],
         total: 25
     },
@@ -30,6 +31,16 @@ const GameState = {
             const data = JSON.parse(saved);
             this.activities = data.activities || this.activities;
             this.puzzle = data.puzzle || this.puzzle;
+            // Handle migration from old format without unlocked array
+            if (!this.puzzle.unlocked) {
+                this.puzzle.unlocked = [];
+                // Convert old collected count to unlocked pieces (sequential for compatibility)
+                for (let i = 0; i < this.puzzle.collected; i++) {
+                    if (!this.puzzle.placed.includes(i)) {
+                        this.puzzle.unlocked.push(i);
+                    }
+                }
+            }
             this.finaleReached = data.finaleReached || false;
         }
     },
@@ -38,7 +49,21 @@ const GameState = {
     completeActivity(activityName) {
         if (!this.activities[activityName].completed) {
             this.activities[activityName].completed = true;
-            this.puzzle.collected = Math.min(this.puzzle.collected + 5, this.puzzle.total);
+
+            // Unlock 5 random pieces that haven't been unlocked yet
+            const allPieces = Array.from({ length: 25 }, (_, i) => i);
+            const availablePieces = allPieces.filter(p => !this.puzzle.unlocked.includes(p));
+
+            // Shuffle and take up to 5
+            for (let i = availablePieces.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [availablePieces[i], availablePieces[j]] = [availablePieces[j], availablePieces[i]];
+            }
+
+            const piecesToUnlock = availablePieces.slice(0, Math.min(5, availablePieces.length));
+            this.puzzle.unlocked.push(...piecesToUnlock);
+            this.puzzle.collected = this.puzzle.unlocked.length;
+
             this.save();
             this.updateUI();
             return true;
@@ -98,6 +123,7 @@ const GameState = {
         };
         this.puzzle = {
             collected: 0,
+            unlocked: [],
             placed: [],
             total: 25
         };

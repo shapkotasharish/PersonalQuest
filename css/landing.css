@@ -24,42 +24,79 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 40px;
+    gap: 30px;
+}
+
+/* Main Title with Heart Frame */
+.main-title {
+    font-family: 'Dancing Script', cursive;
+    font-size: clamp(5rem, 12vw, 10rem);
+    font-weight: 700;
+    color: #fff;
+    text-shadow:
+        0 0 20px rgba(255, 107, 157, 0.8),
+        0 0 40px rgba(255, 107, 157, 0.6),
+        0 0 60px rgba(255, 107, 157, 0.4),
+        0 4px 8px rgba(0, 0, 0, 0.3);
+    letter-spacing: 4px;
+    animation: titleFloat 4s ease-in-out infinite;
+    position: relative;
+}
+
+@keyframes titleFloat {
+    0%, 100% {
+        transform: translateY(0);
+        text-shadow:
+            0 0 20px rgba(255, 107, 157, 0.8),
+            0 0 40px rgba(255, 107, 157, 0.6),
+            0 0 60px rgba(255, 107, 157, 0.4),
+            0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+    50% {
+        transform: translateY(-10px);
+        text-shadow:
+            0 0 30px rgba(255, 107, 157, 1),
+            0 0 60px rgba(255, 107, 157, 0.8),
+            0 0 90px rgba(255, 107, 157, 0.5),
+            0 8px 16px rgba(0, 0, 0, 0.3);
+    }
 }
 
 /* Menu Button */
 .menu-btn {
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
     background: rgba(255, 255, 255, 0.1);
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border: 2px solid rgba(255, 107, 157, 0.5);
     border-radius: 50%;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 5px;
+    gap: 6px;
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
+    box-shadow: 0 0 20px rgba(255, 107, 157, 0.3);
 }
 
 .menu-btn:hover {
     background: rgba(255, 107, 157, 0.3);
     border-color: var(--primary-pink);
     transform: scale(1.1);
+    box-shadow: 0 0 30px rgba(255, 107, 157, 0.5);
 }
 
 .menu-btn span {
-    width: 20px;
-    height: 2px;
+    width: 24px;
+    height: 3px;
     background: white;
-    border-radius: 2px;
+    border-radius: 3px;
     transition: all 0.3s ease;
 }
 
 .menu-btn.active span:nth-child(1) {
-    transform: rotate(45deg) translate(5px, 5px);
+    transform: rotate(45deg) translate(6px, 6px);
 }
 
 .menu-btn.active span:nth-child(2) {
@@ -67,7 +104,7 @@
 }
 
 .menu-btn.active span:nth-child(3) {
-    transform: rotate(-45deg) translate(5px, -5px);
+    transform: rotate(-45deg) translate(6px, -6px);
 }
 
 /* Activity Menu */
@@ -77,12 +114,14 @@
     top: 50%;
     transform: translateY(-50%);
     z-index: 100;
-    background: rgba(45, 27, 78, 0.9);
+    background: rgba(20, 10, 40, 0.95);
     padding: 30px;
     border-radius: 20px;
-    border: 2px solid rgba(255, 107, 157, 0.3);
+    border: 2px solid rgba(255, 107, 157, 0.4);
     backdrop-filter: blur(20px);
-    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+    box-shadow:
+        0 10px 50px rgba(0, 0, 0, 0.5),
+        0 0 30px rgba(255, 107, 157, 0.2);
     animation: slideIn 0.4s ease;
 }
 
@@ -98,7 +137,7 @@
 .menu-header {
     margin-bottom: 25px;
     padding-bottom: 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 107, 157, 0.3);
 }
 
 .progress-display {
@@ -108,17 +147,18 @@
 }
 
 .progress-text {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     color: var(--warm-pink);
     font-weight: 500;
 }
 
 .progress-bar {
     width: 100%;
-    height: 8px;
+    height: 10px;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 10px;
     overflow: hidden;
+    border: 1px solid rgba(255, 107, 157, 0.3);
 }
 
 .progress-fill {
@@ -127,6 +167,7 @@
     background: linear-gradient(90deg, var(--primary-pink), var(--primary-gold));
     border-radius: 10px;
     transition: width 0.5s ease;
+    box-shadow: 0 0 10px var(--primary-pink);
 }
 
 .progress-count {
@@ -145,7 +186,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 15px 20px;
+    padding: 16px 20px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 12px;
     cursor: pointer;
@@ -157,16 +198,18 @@
     background: rgba(255, 107, 157, 0.2);
     border-color: var(--primary-pink);
     transform: translateX(-5px);
+    box-shadow: 0 0 20px rgba(255, 107, 157, 0.2);
 }
 
 .activity-item.completed {
     border-color: rgba(100, 255, 100, 0.5);
+    background: rgba(100, 255, 100, 0.1);
 }
 
 .activity-item.completed .activity-status::after {
     content: '\2713';
     color: #64ff64;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
 }
 
 .activity-name {
@@ -175,32 +218,54 @@
 }
 
 .activity-item.puzzle-btn {
-    margin-top: 10px;
+    margin-top: 15px;
     background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 107, 157, 0.2));
     border: 1px solid rgba(255, 215, 0, 0.4);
 }
 
 .activity-item.puzzle-btn:hover {
     background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 107, 157, 0.3));
+    border-color: var(--primary-gold);
 }
 
 .puzzle-icon::after {
     content: '\1F9E9';
-    font-size: 1.2rem;
+    font-size: 1.3rem;
+}
+
+/* Reset Button in Menu */
+.reset-all-btn {
+    margin-top: 20px;
+    padding: 12px 20px;
+    width: 100%;
+    background: rgba(255, 50, 50, 0.2);
+    border: 1px solid rgba(255, 50, 50, 0.4);
+    border-radius: 10px;
+    color: #ff6666;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.reset-all-btn:hover {
+    background: rgba(255, 50, 50, 0.4);
+    border-color: #ff6666;
 }
 
 /* Click instruction */
 .click-instruction {
     position: absolute;
-    bottom: 30px;
+    bottom: 40px;
     left: 50%;
     transform: translateX(-50%);
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.95rem;
     animation: pulse 2s ease-in-out infinite;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 0.5; }
+    0%, 100% { opacity: 0.6; }
     50% { opacity: 1; }
 }

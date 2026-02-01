@@ -446,6 +446,209 @@
     75% { transform: translate(100px, 50px) rotate(10deg); }
 }
 
+/* Garden Sky Canvas */
+#garden-sky-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+.garden-scene {
+    position: relative;
+    z-index: 1;
+}
+
+/* Garden Time Indicator */
+.garden-time-indicator {
+    position: absolute;
+    top: 80px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 30px;
+    z-index: 10;
+    transition: all 0.5s ease;
+}
+
+.garden-time-indicator.day {
+    background: rgba(255, 200, 100, 0.3);
+    border: 2px solid rgba(255, 200, 100, 0.5);
+}
+
+.garden-time-indicator.night {
+    background: rgba(100, 100, 200, 0.3);
+    border: 2px solid rgba(100, 100, 200, 0.5);
+}
+
+.garden-time-indicator .sun-icon,
+.garden-time-indicator .moon-icon {
+    font-size: 1.5rem;
+}
+
+.garden-time-indicator .time-text {
+    color: white;
+    font-weight: 500;
+}
+
+/* Garden Bees */
+#bees-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.garden-bee {
+    position: absolute;
+    font-size: 2rem;
+    cursor: pointer;
+    pointer-events: auto;
+    transition: opacity 0.5s ease;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    animation: beeBob 0.5s ease-in-out infinite alternate;
+}
+
+.garden-bee:hover {
+    transform: scale(1.3);
+    filter: drop-shadow(0 0 10px rgba(255, 200, 0, 0.8));
+}
+
+@keyframes beeBob {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-5px); }
+}
+
+/* Plant Growth Stages */
+.plant-stem {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    background: linear-gradient(to top, #228B22, #32CD32);
+    border-radius: 3px;
+    transition: height 0.3s ease;
+}
+
+.plant-leaves {
+    position: absolute;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2rem;
+}
+
+.plant-bud {
+    position: absolute;
+    bottom: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2rem;
+    animation: budPulse 1s ease-in-out infinite;
+}
+
+.plant-bud.pollinated {
+    animation: pollinatedGlow 1s ease-in-out infinite;
+}
+
+@keyframes budPulse {
+    0%, 100% { transform: translateX(-50%) scale(1); }
+    50% { transform: translateX(-50%) scale(1.1); }
+}
+
+@keyframes pollinatedGlow {
+    0%, 100% {
+        transform: translateX(-50%) scale(1);
+        filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.5));
+    }
+    50% {
+        transform: translateX(-50%) scale(1.1);
+        filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
+    }
+}
+
+.flower-growing {
+    position: absolute;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: font-size 0.3s ease;
+}
+
+/* Pollination Indicator */
+.pollination-indicator {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    opacity: 0.7;
+    transition: all 0.3s ease;
+}
+
+.pollination-indicator.active {
+    background: rgba(255, 200, 0, 0.3);
+    border: 2px solid rgba(255, 200, 0, 0.6);
+    opacity: 1;
+    animation: pollinationPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pollinationPulse {
+    0%, 100% { box-shadow: 0 0 5px rgba(255, 200, 0, 0.3); }
+    50% { box-shadow: 0 0 20px rgba(255, 200, 0, 0.6); }
+}
+
+/* Plot Hints */
+.plot-hint {
+    position: absolute;
+    bottom: 10px;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+}
+
+/* Pollen Particles */
+.pollen-particle {
+    position: fixed;
+    font-size: 1.2rem;
+    pointer-events: none;
+    z-index: 100;
+    animation: pollenFloat 1s ease-out forwards;
+}
+
+@keyframes pollenFloat {
+    0% {
+        transform: scale(0.5) translateY(0);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1.5) translateY(-50px);
+        opacity: 0;
+    }
+}
+
+/* Garden Reset Button */
+.garden-reset {
+    position: absolute;
+    top: 80px;
+    right: 20px;
+    z-index: 10;
+}
+
 /* ==================== MAZE ==================== */
 .maze-container {
     width: 100%;
@@ -550,6 +753,14 @@
     padding: 15px 25px;
     border-radius: 15px;
     border: 2px solid var(--primary-pink);
+}
+
+/* Maze Reset Button */
+.maze-reset {
+    position: absolute;
+    top: 140px;
+    right: 20px;
+    z-index: 10;
 }
 
 /* ==================== RHYTHM ==================== */
@@ -683,6 +894,30 @@
 
 .hit-feedback.okay {
     color: rgba(255, 255, 255, 0.7);
+}
+
+/* Hit feedback container */
+#hit-feedback-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+}
+
+#hit-feedback-container .hit-feedback {
+    position: absolute;
+    transform: translateX(-50%);
+}
+
+/* Rhythm Reset Button */
+.rhythm-reset {
+    position: absolute;
+    top: 80px;
+    right: 20px;
+    z-index: 20;
 }
 
 @keyframes hitPop {
