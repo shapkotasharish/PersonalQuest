@@ -262,7 +262,7 @@ const GardenActivity = {
 
         if (!plot.waterHeld) return;
 
-        const growthRate = 15 * deltaTime; // Slower growth
+        const growthRate = 50 * deltaTime; // Much faster growth
 
         switch (plot.state) {
             case 'planted':
@@ -612,32 +612,45 @@ const GardenActivity = {
     },
 
     handleBeeClick(beeIndex) {
-        if (!this.dayNightCycle.isDay) return;
+        if (!this.dayNightCycle.isDay) {
+            // Show message that bees only work during day
+            const bee = this.bees[beeIndex];
+            const rect = bee.element.getBoundingClientRect();
+            const msg = document.createElement('div');
+            msg.className = 'no-water-message';
+            msg.textContent = '☀️ Wait for daytime!';
+            msg.style.left = rect.left + 'px';
+            msg.style.top = (rect.top - 20) + 'px';
+            document.body.appendChild(msg);
+            setTimeout(() => msg.remove(), 1500);
+            return;
+        }
 
         const bee = this.bees[beeIndex];
 
-        // Find nearest plot that needs pollination
-        let nearestPlot = null;
-        let nearestDist = Infinity;
+        // Find ANY plot that needs pollination (bee will fly to it)
+        let targetPlot = null;
 
-        this.plots.forEach((plot, index) => {
-            if (plot.state === 'needsPollination') {
-                const plotRect = plot.element.getBoundingClientRect();
-                const beeRect = bee.element.getBoundingClientRect();
-
-                const dx = plotRect.left + plotRect.width/2 - (beeRect.left + beeRect.width/2);
-                const dy = plotRect.top + plotRect.height/2 - (beeRect.top + beeRect.height/2);
-                const dist = Math.sqrt(dx*dx + dy*dy);
-
-                if (dist < nearestDist && dist < 150) {
-                    nearestDist = dist;
-                    nearestPlot = index;
-                }
+        for (let i = 0; i < this.plots.length; i++) {
+            if (this.plots[i].state === 'needsPollination') {
+                targetPlot = i;
+                break;
             }
-        });
+        }
 
-        if (nearestPlot !== null) {
-            this.pollinatePlot(nearestPlot, beeIndex);
+        if (targetPlot !== null) {
+            this.pollinatePlot(targetPlot, beeIndex);
+            AudioManager.playEffect('success');
+        } else {
+            // No plants need pollination
+            const rect = bee.element.getBoundingClientRect();
+            const msg = document.createElement('div');
+            msg.className = 'no-water-message';
+            msg.textContent = '🌼 No flowers need pollination!';
+            msg.style.left = rect.left + 'px';
+            msg.style.top = (rect.top - 20) + 'px';
+            document.body.appendChild(msg);
+            setTimeout(() => msg.remove(), 1500);
         }
     },
 
@@ -705,9 +718,9 @@ const GardenActivity = {
 
             if (!isDay) return;
 
-            // Move bees
-            bee.x += bee.vx * deltaTime * 30;
-            bee.y += bee.vy * deltaTime * 30;
+            // Move bees (slower movement)
+            bee.x += bee.vx * deltaTime * 10;
+            bee.y += bee.vy * deltaTime * 10;
 
             // Bounce off walls
             if (bee.x < 5 || bee.x > 95) {

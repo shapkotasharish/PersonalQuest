@@ -9,73 +9,61 @@ const ConstellationActivity = {
     hintActive: false,
     animationFrame: null,
 
-    // Love-themed constellations with meaningful shapes
+    // Love-themed constellations - simple shapes, no duplicate points
     constellationShapes: [
         {
             name: 'Heart',
             message: 'You Have My Heart',
-            // Heart shape points
             points: [
-                [0.5, 0.35],   // top center dip
-                [0.35, 0.25],  // left top
-                [0.2, 0.35],   // left outer
-                [0.2, 0.5],    // left middle
-                [0.35, 0.7],   // left bottom
-                [0.5, 0.85],   // bottom point
-                [0.65, 0.7],   // right bottom
-                [0.8, 0.5],    // right middle
-                [0.8, 0.35],   // right outer
-                [0.65, 0.25],  // right top
-                [0.5, 0.35]    // back to top
+                [0.5, 0.3],    // 1 - top center
+                [0.35, 0.2],   // 2 - left bump
+                [0.2, 0.35],   // 3 - left side
+                [0.35, 0.6],   // 4 - left bottom
+                [0.5, 0.8],    // 5 - bottom point
+                [0.65, 0.6],   // 6 - right bottom
+                [0.8, 0.35],   // 7 - right side
+                [0.65, 0.2],   // 8 - right bump
             ]
         },
         {
-            name: 'Infinity',
-            message: 'Forever & Always',
-            // Infinity symbol
+            name: 'Star',
+            message: 'You Are My Star',
             points: [
-                [0.5, 0.5],    // center
-                [0.35, 0.4],   // left top
-                [0.2, 0.5],    // left outer
-                [0.35, 0.6],   // left bottom
-                [0.5, 0.5],    // center
-                [0.65, 0.4],   // right top
-                [0.8, 0.5],    // right outer
-                [0.65, 0.6],   // right bottom
-                [0.5, 0.5]     // back to center
+                [0.5, 0.15],   // 1 - top
+                [0.4, 0.4],    // 2 - inner left top
+                [0.15, 0.4],   // 3 - left point
+                [0.35, 0.55],  // 4 - inner left bottom
+                [0.25, 0.85],  // 5 - bottom left point
+                [0.5, 0.65],   // 6 - inner bottom
+                [0.75, 0.85],  // 7 - bottom right point
+                [0.65, 0.55],  // 8 - inner right bottom
+                [0.85, 0.4],   // 9 - right point
+                [0.6, 0.4],    // 10 - inner right top
             ]
         },
         {
-            name: 'Two Stars',
-            message: 'You & Me',
-            // Two people/stars connected
+            name: 'Diamond',
+            message: 'You & Me Forever',
             points: [
-                [0.3, 0.3],    // left head
-                [0.3, 0.45],   // left body top
-                [0.2, 0.55],   // left arm out
-                [0.3, 0.45],   // back
-                [0.4, 0.55],   // left arm in (reaching)
-                [0.6, 0.55],   // right arm in (reaching)
-                [0.7, 0.45],   // right body top
-                [0.8, 0.55],   // right arm out
-                [0.7, 0.45],   // back
-                [0.7, 0.3],    // right head
+                [0.5, 0.15],   // 1 - top
+                [0.25, 0.4],   // 2 - upper left
+                [0.15, 0.5],   // 3 - left
+                [0.35, 0.7],   // 4 - lower left
+                [0.5, 0.9],    // 5 - bottom
+                [0.65, 0.7],   // 6 - lower right
+                [0.85, 0.5],   // 7 - right
+                [0.75, 0.4],   // 8 - upper right
             ]
         },
         {
-            name: 'Rose',
-            message: 'My Love Blooms For You',
-            // Simple rose shape
+            name: 'Arrow',
+            message: 'My Heart Points To You',
             points: [
-                [0.5, 0.25],   // top petal
-                [0.6, 0.35],   // right petal
-                [0.55, 0.45],  // right inner
-                [0.5, 0.4],    // center
-                [0.45, 0.45],  // left inner
-                [0.4, 0.35],   // left petal
-                [0.5, 0.25],   // back to top
-                [0.5, 0.4],    // center
-                [0.5, 0.75],   // stem bottom
+                [0.2, 0.3],    // 1 - arrow head top
+                [0.5, 0.5],    // 2 - arrow point
+                [0.2, 0.7],    // 3 - arrow head bottom
+                [0.35, 0.5],   // 4 - shaft start
+                [0.85, 0.5],   // 5 - shaft end
             ]
         }
     ],

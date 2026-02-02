@@ -13,10 +13,10 @@ const MazeActivity = {
     portalAnimation: 0,
     animationFrame: null,
 
-    // Maze settings - larger for more challenge
-    mazeRows: 21,
-    mazeCols: 29,
-    cellSize: 30,
+    // Maze settings - sized for better gameplay
+    mazeRows: 15,
+    mazeCols: 21,
+    cellSize: 35,
 
     // Forest scene
     willowTrees: [],
@@ -136,7 +136,7 @@ const MazeActivity = {
                 <div class="maze-controls" id="maze-controls">
                     ${this.mode === 'solo' ?
                         'Use Arrow Keys or WASD to move' :
-                        'Player 1: WASD | Player 2: Arrow Keys'}
+                        'Player 1: WASD | Player 2: IJKL'}
                 </div>
                 <div class="memory-counter" id="memory-counter">
                     Memories: 0/${MemoryData.length}
@@ -167,7 +167,7 @@ const MazeActivity = {
         text.innerHTML = `
             Navigate through our memory lane and collect precious moments!<br><br>
             <strong>How to play:</strong><br>
-            • ${this.mode === 'solo' ? 'Use Arrow Keys or WASD to move' : 'Player 1: WASD, Player 2: Arrow Keys'}<br>
+            • ${this.mode === 'solo' ? 'Use Arrow Keys or WASD to move' : 'Player 1: WASD, Player 2: IJKL'}<br>
             • Walk through the willow forest to find the portal<br>
             • Enter the portal to access the memory maze<br>
             • ${this.mode === 'duet' ? 'Players start at opposite corners - meet at the heart in the center!' : 'Navigate the maze to reach the heart in the center'}<br>
@@ -419,8 +419,8 @@ const MazeActivity = {
             this.player = {
                 x: this.canvas.width / 2 - (this.mode === 'duet' ? 30 : 0),
                 y: this.canvas.height - 100,
-                size: 30,
-                speed: 4,
+                size: 20,
+                speed: 5,
                 avatar: this.avatarOptions.type,
                 color: this.avatarOptions.color,
                 trail: this.avatarOptions.trail
@@ -430,8 +430,8 @@ const MazeActivity = {
                 this.player2 = {
                     x: this.canvas.width / 2 + 30,
                     y: this.canvas.height - 100,
-                    size: 30,
-                    speed: 4,
+                    size: 20,
+                    speed: 5,
                     avatar: '💖',
                     color: '#ffd700',
                     trail: 'stars'
@@ -465,7 +465,7 @@ const MazeActivity = {
         if (controls) {
             controls.innerHTML = this.mode === 'solo' ?
                 'Use Arrow Keys or WASD to move | Find the heart in the center!' :
-                'Player 1: WASD (top-left) | Player 2: Arrow Keys (bottom-right) | Meet in the middle!';
+                'Player 1: WASD (top-left) | Player 2: IJKL (bottom-right) | Meet in the middle!';
         }
     },
 
@@ -526,15 +526,16 @@ const MazeActivity = {
                 }
             }
         } else if (this.gamePhase === 'maze') {
-            // Maze collision detection
-            if (!this.checkMazeCollision(newX, newY, player.size * 0.4)) {
+            // Maze collision detection - use smaller radius for easier movement
+            const collisionRadius = player.size * 0.3;
+            if (!this.checkMazeCollision(newX, newY, collisionRadius)) {
                 player.x = newX;
                 player.y = newY;
             } else {
-                // Try moving in only one direction
-                if (!this.checkMazeCollision(newX, player.y, player.size * 0.4)) {
+                // Try moving in only one direction (allows sliding along walls)
+                if (!this.checkMazeCollision(newX, player.y, collisionRadius)) {
                     player.x = newX;
-                } else if (!this.checkMazeCollision(player.x, newY, player.size * 0.4)) {
+                } else if (!this.checkMazeCollision(player.x, newY, collisionRadius)) {
                     player.y = newY;
                 }
             }
@@ -997,9 +998,11 @@ const MazeActivity = {
         if (this.mode === 'solo') {
             this.updatePlayer(this.player, 'w', 's', 'a', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright');
         } else {
+            // Player 1: WASD
             this.updatePlayer(this.player, 'w', 's', 'a', 'd');
+            // Player 2: IJKL
             if (this.player2) {
-                this.updatePlayer(this.player2, 'arrowup', 'arrowdown', 'arrowleft', 'arrowright');
+                this.updatePlayer(this.player2, 'i', 'k', 'j', 'l');
             }
         }
 

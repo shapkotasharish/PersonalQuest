@@ -473,18 +473,28 @@ const RhythmActivity = {
         this.startTime = performance.now();
         this.gameTime = 0;
 
-        // Start audio with a small delay for sync
-        setTimeout(async () => {
-            this.audio = await AudioManager.play(this.selectedSong.file);
+        // Set a game duration (2 minutes or until audio ends)
+        this.gameDuration = 120000;
 
-            if (this.audio) {
-                this.audio.addEventListener('ended', () => {
-                    setTimeout(() => this.endGame(), 1000);
-                });
+        // Start the animation immediately
+        this.animate();
+
+        // Try to start audio with a small delay for sync
+        setTimeout(async () => {
+            try {
+                this.audio = await AudioManager.play(this.selectedSong.file);
+
+                if (this.audio) {
+                    this.audio.addEventListener('ended', () => {
+                        setTimeout(() => this.endGame(), 1000);
+                    });
+                }
+            } catch (err) {
+                console.log('Audio failed to load, game continues without music');
+                // Game continues even without audio - end after duration
+                setTimeout(() => this.endGame(), this.gameDuration);
             }
         }, 500);
-
-        this.animate();
     },
 
     handleHit(key) {
