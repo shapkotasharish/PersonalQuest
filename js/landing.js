@@ -233,6 +233,17 @@ const Landing = {
         } : { r: 0, g: 0, b: 0 };
     },
 
+    colorWithAlpha(color, alpha) {
+        // Handle RGB format: rgb(r, g, b)
+        const rgbMatch = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+        if (rgbMatch) {
+            return `rgba(${rgbMatch[1]}, ${rgbMatch[2]}, ${rgbMatch[3]}, ${alpha})`;
+        }
+        // Handle hex format: #rrggbb
+        const rgb = this.hexToRgb(color);
+        return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+    },
+
     getCurrentPalette() {
         const current = this.palettes[this.timeOfDay];
         const target = this.palettes[this.targetTime];
@@ -276,9 +287,9 @@ const Landing = {
 
         // Large glow
         const glowGradient = this.ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, sunRadius * 8);
-        glowGradient.addColorStop(0, palette.sun.glow + '60');
-        glowGradient.addColorStop(0.3, palette.sun.glow + '30');
-        glowGradient.addColorStop(0.6, palette.sun.glow + '10');
+        glowGradient.addColorStop(0, this.colorWithAlpha(palette.sun.glow, 0.38));
+        glowGradient.addColorStop(0.3, this.colorWithAlpha(palette.sun.glow, 0.19));
+        glowGradient.addColorStop(0.6, this.colorWithAlpha(palette.sun.glow, 0.06));
         glowGradient.addColorStop(1, 'transparent');
 
         this.ctx.fillStyle = glowGradient;
