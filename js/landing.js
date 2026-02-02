@@ -17,6 +17,10 @@ const Landing = {
     animationFrame: null,
     time: 0,
 
+    // Tree image
+    treeImage: null,
+    treeImageLoaded: false,
+
     // Photorealistic color palettes
     palettes: {
         0: { // Sunset
@@ -70,11 +74,22 @@ const Landing = {
         this.ctx = this.canvas.getContext('2d');
         this.resize();
 
+        // Load tree image
+        this.loadTreeImage();
+
         this.generateTrees();
         this.generateStars();
         this.generateClouds();
 
         window.addEventListener('resize', () => this.resize());
+    },
+
+    loadTreeImage() {
+        this.treeImage = new Image();
+        this.treeImage.onload = () => {
+            this.treeImageLoaded = true;
+        };
+        this.treeImage.src = 'assets/images/trees/WIllowTree.png';
 
         // Track mouse for wind effect
         document.addEventListener('mousemove', (e) => {
@@ -528,10 +543,13 @@ const Landing = {
         this.drawWater(palette);
         this.drawGround(palette);
 
-        // Draw willow trees (sorted by depth)
+        // Draw procedural willow trees (sorted by depth)
         this.willowTrees.forEach(tree => {
             this.drawWillowTree(tree, palette);
         });
+
+        // Draw tree images on top
+        this.drawTreeImages(palette);
 
         // Draw heart around title area
         const centerX = this.canvas.width / 2;
@@ -539,6 +557,56 @@ const Landing = {
         this.drawHeartFrame(centerX, centerY - 80, 120);
 
         this.animationFrame = requestAnimationFrame(() => this.animate());
+    },
+
+    drawTreeImages(palette) {
+        if (!this.treeImageLoaded || !this.treeImage) return;
+
+        const ctx = this.ctx;
+        const img = this.treeImage;
+
+        // Calculate tree dimensions to fill height
+        const treeHeight = this.canvas.height * 1.1;
+        const aspectRatio = img.width / img.height;
+        const treeWidth = treeHeight * aspectRatio;
+
+        // Apply ambient lighting based on time of day
+        ctx.globalAlpha = 0.9;
+
+        // Calculate sway based on wind
+        const swayAmount = this.windForce * this.windDirection * 20;
+        const naturalSway = Math.sin(this.time * 0.5) * 5;
+
+        // Draw tree on the LEFT side
+        ctx.save();
+        ctx.translate(0, this.canvas.height);
+        ctx.scale(1, -1); // Flip for proper orientation if needed
+        ctx.scale(-1, 1); // Mirror for left side
+        ctx.translate(-treeWidth * 0.7, 0);
+
+        // Apply sway transform
+        ctx.translate(treeWidth / 2, treeHeight);
+        ctx.rotate((swayAmount + naturalSway) * 0.002);
+        ctx.translate(-treeWidth / 2, -treeHeight);
+
+        ctx.scale(1, -1); // Flip back
+        ctx.translate(0, -this.canvas.height);
+        ctx.drawImage(img, 0, this.canvas.height - treeHeight, treeWidth, treeHeight);
+        ctx.restore();
+
+        // Draw tree on the RIGHT side
+        ctx.save();
+        ctx.translate(this.canvas.width - treeWidth * 0.7, 0);
+
+        // Apply sway transform
+        ctx.translate(treeWidth / 2, this.canvas.height);
+        ctx.rotate(-(swayAmount + naturalSway) * 0.002);
+        ctx.translate(-treeWidth / 2, -this.canvas.height);
+
+        ctx.drawImage(img, 0, this.canvas.height - treeHeight, treeWidth, treeHeight);
+        ctx.restore();
+
+        ctx.globalAlpha = 1;
     },
 
     destroy() {
