@@ -201,8 +201,8 @@ const GardenActivity = {
 
         if (!canWater) return;
 
-        // Check if bucket has water
-        const waterNeeded = 10;
+        // Check if bucket has water - reduced water cost for faster growth
+        const waterNeeded = 3;
         if (this.bucket.water < waterNeeded) {
             // Show "no water" feedback
             this.showNoWaterMessage(plot.element);

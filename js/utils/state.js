@@ -4,14 +4,13 @@ const GameState = {
         drawing: { completed: false, data: null },
         constellation: { completed: false, data: null },
         garden: { completed: false, data: null },
-        maze: { completed: false, data: null },
-        rhythm: { completed: false, data: null }
+        maze: { completed: false, data: null }
     },
     puzzle: {
         collected: 0,
         unlocked: [], // Array of unlocked piece indices
         placed: [],
-        total: 25
+        total: 20
     },
     finaleReached: false,
 
@@ -118,14 +117,13 @@ const GameState = {
             drawing: { completed: false, data: null },
             constellation: { completed: false, data: null },
             garden: { completed: false, data: null },
-            maze: { completed: false, data: null },
-            rhythm: { completed: false, data: null }
+            maze: { completed: false, data: null }
         };
         this.puzzle = {
             collected: 0,
             unlocked: [],
             placed: [],
-            total: 25
+            total: 20
         };
         this.finaleReached = false;
         this.save();

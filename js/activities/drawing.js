@@ -110,378 +110,733 @@ const DrawingActivity = {
             }}
         ],
         medium: [
-            { name: 'Flower', draw: (ctx, w, h) => {
+            { name: 'Flower in Pot', draw: (ctx, w, h) => {
                 ctx.strokeStyle = '#000';
                 ctx.lineWidth = 3;
+                // Pot
+                ctx.beginPath();
+                ctx.moveTo(w*0.3, h*0.65);
+                ctx.lineTo(w*0.35, h*0.92);
+                ctx.lineTo(w*0.65, h*0.92);
+                ctx.lineTo(w*0.7, h*0.65);
+                ctx.closePath();
+                ctx.stroke();
+                // Pot rim
+                ctx.strokeRect(w*0.28, h*0.6, w*0.44, h*0.08);
                 // Stem
                 ctx.beginPath();
-                ctx.moveTo(w/2, h*0.5);
-                ctx.quadraticCurveTo(w*0.45, h*0.7, w/2, h*0.9);
+                ctx.moveTo(w/2, h*0.6);
+                ctx.quadraticCurveTo(w*0.45, h*0.45, w/2, h*0.35);
                 ctx.stroke();
-                // Leaf
+                // Leaves on stem
                 ctx.beginPath();
-                ctx.ellipse(w*0.35, h*0.7, w*0.08, w*0.04, -0.5, 0, Math.PI*2);
+                ctx.ellipse(w*0.38, h*0.5, w*0.08, w*0.04, -0.5, 0, Math.PI*2);
                 ctx.stroke();
-                // Petals
+                ctx.beginPath();
+                ctx.ellipse(w*0.6, h*0.45, w*0.07, w*0.035, 0.5, 0, Math.PI*2);
+                ctx.stroke();
+                // Petals (6 overlapping)
                 for(let i = 0; i < 6; i++) {
                     const angle = i * Math.PI / 3;
                     ctx.beginPath();
-                    ctx.ellipse(w/2 + Math.cos(angle)*w*0.12, h*0.35 + Math.sin(angle)*w*0.12, w*0.1, w*0.06, angle, 0, Math.PI*2);
+                    ctx.ellipse(w/2 + Math.cos(angle)*w*0.1, h*0.25 + Math.sin(angle)*w*0.1, w*0.1, w*0.06, angle, 0, Math.PI*2);
                     ctx.stroke();
                 }
-                // Center
+                // Center with detail
                 ctx.beginPath();
-                ctx.arc(w/2, h*0.35, w*0.06, 0, Math.PI*2);
+                ctx.arc(w/2, h*0.25, w*0.05, 0, Math.PI*2);
                 ctx.stroke();
+                // Inner center dots
+                for(let i = 0; i < 5; i++) {
+                    ctx.beginPath();
+                    ctx.arc(w/2 + Math.cos(i*1.2)*w*0.02, h*0.25 + Math.sin(i*1.2)*w*0.02, 2, 0, Math.PI*2);
+                    ctx.fill();
+                }
             }},
-            { name: 'Cat', draw: (ctx, w, h) => {
+            { name: 'Dog', draw: (ctx, w, h) => {
                 ctx.strokeStyle = '#000';
                 ctx.lineWidth = 3;
                 // Body
                 ctx.beginPath();
-                ctx.ellipse(w/2, h*0.6, w*0.2, w*0.15, 0, 0, Math.PI*2);
+                ctx.ellipse(w*0.45, h*0.55, w*0.22, w*0.14, 0, 0, Math.PI*2);
                 ctx.stroke();
                 // Head
                 ctx.beginPath();
-                ctx.arc(w/2, h*0.32, w*0.12, 0, Math.PI*2);
+                ctx.arc(w*0.72, h*0.4, w*0.12, 0, Math.PI*2);
                 ctx.stroke();
-                // Ears
+                // Snout
                 ctx.beginPath();
-                ctx.moveTo(w*0.4, h*0.25);
-                ctx.lineTo(w*0.35, h*0.12);
-                ctx.lineTo(w*0.45, h*0.22);
-                ctx.moveTo(w*0.6, h*0.25);
-                ctx.lineTo(w*0.65, h*0.12);
-                ctx.lineTo(w*0.55, h*0.22);
+                ctx.ellipse(w*0.85, h*0.43, w*0.06, w*0.04, 0, 0, Math.PI*2);
+                ctx.stroke();
+                // Nose
+                ctx.beginPath();
+                ctx.arc(w*0.9, h*0.43, w*0.02, 0, Math.PI*2);
+                ctx.fill();
+                // Ears (floppy)
+                ctx.beginPath();
+                ctx.ellipse(w*0.65, h*0.32, w*0.04, w*0.1, -0.3, 0, Math.PI*2);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.ellipse(w*0.78, h*0.3, w*0.04, w*0.1, 0.3, 0, Math.PI*2);
                 ctx.stroke();
                 // Eyes
                 ctx.beginPath();
-                ctx.arc(w*0.45, h*0.3, w*0.025, 0, Math.PI*2);
-                ctx.arc(w*0.55, h*0.3, w*0.025, 0, Math.PI*2);
+                ctx.arc(w*0.68, h*0.38, w*0.02, 0, Math.PI*2);
+                ctx.arc(w*0.76, h*0.38, w*0.02, 0, Math.PI*2);
                 ctx.fill();
-                // Whiskers
-                ctx.beginPath();
-                ctx.moveTo(w*0.35, h*0.35);
-                ctx.lineTo(w*0.2, h*0.33);
-                ctx.moveTo(w*0.35, h*0.38);
-                ctx.lineTo(w*0.2, h*0.4);
-                ctx.moveTo(w*0.65, h*0.35);
-                ctx.lineTo(w*0.8, h*0.33);
-                ctx.moveTo(w*0.65, h*0.38);
-                ctx.lineTo(w*0.8, h*0.4);
-                ctx.stroke();
+                // Legs
+                ctx.strokeRect(w*0.28, h*0.65, w*0.06, h*0.2);
+                ctx.strokeRect(w*0.38, h*0.65, w*0.06, h*0.2);
+                ctx.strokeRect(w*0.52, h*0.65, w*0.06, h*0.2);
+                ctx.strokeRect(w*0.62, h*0.65, w*0.06, h*0.2);
                 // Tail
                 ctx.beginPath();
-                ctx.moveTo(w*0.7, h*0.6);
-                ctx.quadraticCurveTo(w*0.9, h*0.5, w*0.85, h*0.35);
+                ctx.moveTo(w*0.23, h*0.52);
+                ctx.quadraticCurveTo(w*0.1, h*0.35, w*0.15, h*0.25);
                 ctx.stroke();
             }},
-            { name: 'Bird', draw: (ctx, w, h) => {
+            { name: 'Fish', draw: (ctx, w, h) => {
                 ctx.strokeStyle = '#000';
                 ctx.lineWidth = 3;
                 // Body
                 ctx.beginPath();
-                ctx.ellipse(w/2, h/2, w*0.2, w*0.12, 0, 0, Math.PI*2);
+                ctx.ellipse(w*0.5, h*0.5, w*0.28, w*0.15, 0, 0, Math.PI*2);
                 ctx.stroke();
-                // Head
+                // Tail
                 ctx.beginPath();
-                ctx.arc(w*0.7, h*0.42, w*0.08, 0, Math.PI*2);
+                ctx.moveTo(w*0.22, h*0.5);
+                ctx.lineTo(w*0.08, h*0.3);
+                ctx.lineTo(w*0.08, h*0.7);
+                ctx.closePath();
+                ctx.stroke();
+                // Dorsal fin
+                ctx.beginPath();
+                ctx.moveTo(w*0.4, h*0.35);
+                ctx.quadraticCurveTo(w*0.5, h*0.15, w*0.6, h*0.35);
+                ctx.stroke();
+                // Bottom fin
+                ctx.beginPath();
+                ctx.moveTo(w*0.45, h*0.65);
+                ctx.quadraticCurveTo(w*0.5, h*0.8, w*0.55, h*0.65);
                 ctx.stroke();
                 // Eye
                 ctx.beginPath();
-                ctx.arc(w*0.72, h*0.4, w*0.02, 0, Math.PI*2);
+                ctx.arc(w*0.68, h*0.47, w*0.04, 0, Math.PI*2);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(w*0.69, h*0.46, w*0.015, 0, Math.PI*2);
                 ctx.fill();
-                // Beak
-                ctx.beginPath();
-                ctx.moveTo(w*0.78, h*0.42);
-                ctx.lineTo(w*0.9, h*0.44);
-                ctx.lineTo(w*0.78, h*0.46);
-                ctx.stroke();
-                // Wing
-                ctx.beginPath();
-                ctx.ellipse(w*0.45, h*0.48, w*0.1, w*0.06, -0.3, 0, Math.PI*2);
-                ctx.stroke();
-                // Tail
-                ctx.beginPath();
-                ctx.moveTo(w*0.3, h*0.48);
-                ctx.lineTo(w*0.12, h*0.38);
-                ctx.moveTo(w*0.3, h*0.52);
-                ctx.lineTo(w*0.12, h*0.52);
-                ctx.stroke();
-            }},
-            { name: 'Butterfly', draw: (ctx, w, h) => {
-                ctx.strokeStyle = '#000';
-                ctx.lineWidth = 3;
-                // Body
-                ctx.beginPath();
-                ctx.ellipse(w/2, h/2, w*0.025, h*0.2, 0, 0, Math.PI*2);
-                ctx.stroke();
-                // Upper wings
-                ctx.beginPath();
-                ctx.ellipse(w*0.32, h*0.38, w*0.15, h*0.14, -0.3, 0, Math.PI*2);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.ellipse(w*0.68, h*0.38, w*0.15, h*0.14, 0.3, 0, Math.PI*2);
-                ctx.stroke();
-                // Lower wings
-                ctx.beginPath();
-                ctx.ellipse(w*0.36, h*0.62, w*0.1, h*0.1, 0.2, 0, Math.PI*2);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.ellipse(w*0.64, h*0.62, w*0.1, h*0.1, -0.2, 0, Math.PI*2);
-                ctx.stroke();
-                // Antennae
-                ctx.beginPath();
-                ctx.moveTo(w*0.48, h*0.3);
-                ctx.quadraticCurveTo(w*0.4, h*0.18, w*0.38, h*0.12);
-                ctx.moveTo(w*0.52, h*0.3);
-                ctx.quadraticCurveTo(w*0.6, h*0.18, w*0.62, h*0.12);
-                ctx.stroke();
-            }}
-        ],
-        hard: [
-            { name: 'Rose', draw: (ctx, w, h) => {
-                ctx.strokeStyle = '#000';
-                ctx.lineWidth = 2;
-                // Stem
-                ctx.beginPath();
-                ctx.moveTo(w/2, h*0.55);
-                ctx.quadraticCurveTo(w*0.4, h*0.75, w/2, h*0.95);
-                ctx.stroke();
-                // Leaves
-                ctx.beginPath();
-                ctx.ellipse(w*0.35, h*0.72, w*0.1, w*0.05, -0.5, 0, Math.PI*2);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.ellipse(w*0.62, h*0.8, w*0.08, w*0.04, 0.5, 0, Math.PI*2);
-                ctx.stroke();
-                // Petals (spiral layers)
-                const cx = w/2, cy = h*0.35;
-                for(let layer = 0; layer < 3; layer++) {
-                    const r = w*(0.08 + layer*0.06);
-                    for(let i = 0; i < 5; i++) {
-                        const angle = (i/5)*Math.PI*2 + layer*0.4;
+                // Scales pattern
+                for(let row = 0; row < 3; row++) {
+                    for(let col = 0; col < 4; col++) {
                         ctx.beginPath();
-                        ctx.ellipse(cx + Math.cos(angle)*r*0.5, cy + Math.sin(angle)*r*0.5, r*0.35, r*0.2, angle, 0, Math.PI*2);
+                        ctx.arc(w*(0.35 + col*0.08), h*(0.42 + row*0.06), w*0.03, 0, Math.PI);
                         ctx.stroke();
                     }
                 }
-                // Shading guide (dashed)
-                ctx.setLineDash([4, 4]);
-                ctx.strokeStyle = '#888';
+                // Mouth
                 ctx.beginPath();
-                ctx.arc(cx - w*0.06, cy - h*0.03, w*0.1, Math.PI*0.7, Math.PI*1.5);
+                ctx.arc(w*0.78, h*0.52, w*0.02, Math.PI*0.5, Math.PI*1.5);
                 ctx.stroke();
-                ctx.setLineDash([]);
             }},
-            { name: 'Landscape', draw: (ctx, w, h) => {
+            { name: 'Mushroom', draw: (ctx, w, h) => {
                 ctx.strokeStyle = '#000';
-                ctx.lineWidth = 2;
-                // Mountains
+                ctx.lineWidth = 3;
+                // Stem
                 ctx.beginPath();
-                ctx.moveTo(0, h*0.6);
-                ctx.lineTo(w*0.3, h*0.22);
-                ctx.lineTo(w*0.5, h*0.5);
-                ctx.lineTo(w*0.75, h*0.18);
-                ctx.lineTo(w, h*0.55);
+                ctx.moveTo(w*0.38, h*0.55);
+                ctx.lineTo(w*0.35, h*0.9);
+                ctx.lineTo(w*0.65, h*0.9);
+                ctx.lineTo(w*0.62, h*0.55);
                 ctx.stroke();
-                // Sun
+                // Cap
                 ctx.beginPath();
-                ctx.arc(w*0.85, h*0.12, w*0.08, 0, Math.PI*2);
+                ctx.arc(w/2, h*0.4, w*0.3, Math.PI, 0);
+                ctx.lineTo(w*0.62, h*0.55);
+                ctx.lineTo(w*0.38, h*0.55);
+                ctx.closePath();
                 ctx.stroke();
-                // Trees in foreground
-                for(let i = 0; i < 3; i++) {
-                    const tx = w*(0.12 + i*0.35);
-                    ctx.strokeRect(tx - w*0.02, h*0.75, w*0.04, h*0.2);
+                // Spots on cap
+                ctx.beginPath();
+                ctx.arc(w*0.35, h*0.32, w*0.05, 0, Math.PI*2);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(w*0.55, h*0.22, w*0.04, 0, Math.PI*2);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(w*0.65, h*0.35, w*0.035, 0, Math.PI*2);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(w*0.45, h*0.38, w*0.03, 0, Math.PI*2);
+                ctx.stroke();
+                // Grass
+                for(let i = 0; i < 7; i++) {
                     ctx.beginPath();
-                    ctx.moveTo(tx, h*0.5);
-                    ctx.lineTo(tx - w*0.08, h*0.78);
-                    ctx.lineTo(tx + w*0.08, h*0.78);
-                    ctx.closePath();
+                    ctx.moveTo(w*(0.2 + i*0.1), h*0.92);
+                    ctx.lineTo(w*(0.22 + i*0.1), h*0.82);
                     ctx.stroke();
                 }
-                // Shading on mountain (dashed)
+            }}
+        ],
+        hard: [
+            { name: 'Detailed Rose', draw: (ctx, w, h) => {
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                // Stem with thorns
+                ctx.beginPath();
+                ctx.moveTo(w/2, h*0.55);
+                ctx.quadraticCurveTo(w*0.42, h*0.7, w*0.48, h*0.95);
+                ctx.stroke();
+                // Thorns
+                for(let i = 0; i < 3; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(w*(0.46 - i*0.01), h*(0.62 + i*0.1));
+                    ctx.lineTo(w*(0.4 - i*0.01), h*(0.6 + i*0.1));
+                    ctx.stroke();
+                }
+                // Detailed leaves with veins
+                ctx.beginPath();
+                ctx.ellipse(w*0.32, h*0.72, w*0.12, w*0.05, -0.5, 0, Math.PI*2);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(w*0.24, h*0.72);
+                ctx.lineTo(w*0.4, h*0.72);
+                ctx.stroke();
+                for(let i = 0; i < 3; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(w*(0.28 + i*0.04), h*0.72);
+                    ctx.lineTo(w*(0.26 + i*0.04), h*(0.69 + (i%2)*0.06));
+                    ctx.stroke();
+                }
+                // Multi-layer petals (4 layers)
+                const cx = w/2, cy = h*0.35;
+                for(let layer = 0; layer < 4; layer++) {
+                    const r = w*(0.06 + layer*0.05);
+                    const petals = 5 + layer;
+                    for(let i = 0; i < petals; i++) {
+                        const angle = (i/petals)*Math.PI*2 + layer*0.3;
+                        ctx.beginPath();
+                        ctx.ellipse(cx + Math.cos(angle)*r*0.5, cy + Math.sin(angle)*r*0.5, r*0.3, r*0.18, angle, 0, Math.PI*2);
+                        ctx.stroke();
+                    }
+                }
+                // Shading guides (dashed)
                 ctx.setLineDash([3, 3]);
                 ctx.strokeStyle = '#888';
                 ctx.beginPath();
-                ctx.moveTo(w*0.3, h*0.22);
-                ctx.lineTo(w*0.38, h*0.45);
-                ctx.lineTo(w*0.28, h*0.45);
-                ctx.closePath();
+                ctx.arc(cx - w*0.05, cy - h*0.02, w*0.08, Math.PI*0.6, Math.PI*1.4);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(cx + w*0.04, cy + h*0.02, w*0.06, Math.PI*1.6, Math.PI*0.4);
                 ctx.stroke();
                 ctx.setLineDash([]);
             }},
-            { name: 'Cupcake', draw: (ctx, w, h) => {
+            { name: 'Castle', draw: (ctx, w, h) => {
                 ctx.strokeStyle = '#000';
                 ctx.lineWidth = 2;
-                // Wrapper (trapezoid)
+                // Main wall
+                ctx.strokeRect(w*0.2, h*0.45, w*0.6, h*0.5);
+                // Battlements
+                for(let i = 0; i < 5; i++) {
+                    ctx.strokeRect(w*(0.2 + i*0.15), h*0.38, w*0.1, h*0.07);
+                }
+                // Left tower
+                ctx.strokeRect(w*0.1, h*0.25, w*0.15, h*0.7);
                 ctx.beginPath();
-                ctx.moveTo(w*0.25, h*0.55);
-                ctx.lineTo(w*0.3, h*0.9);
-                ctx.lineTo(w*0.7, h*0.9);
-                ctx.lineTo(w*0.75, h*0.55);
+                ctx.moveTo(w*0.1, h*0.25);
+                ctx.lineTo(w*0.175, h*0.1);
+                ctx.lineTo(w*0.25, h*0.25);
+                ctx.stroke();
+                // Right tower
+                ctx.strokeRect(w*0.75, h*0.25, w*0.15, h*0.7);
+                ctx.beginPath();
+                ctx.moveTo(w*0.75, h*0.25);
+                ctx.lineTo(w*0.825, h*0.1);
+                ctx.lineTo(w*0.9, h*0.25);
+                ctx.stroke();
+                // Gate
+                ctx.beginPath();
+                ctx.moveTo(w*0.4, h*0.95);
+                ctx.lineTo(w*0.4, h*0.65);
+                ctx.arc(w*0.5, h*0.65, w*0.1, Math.PI, 0);
+                ctx.lineTo(w*0.6, h*0.95);
+                ctx.stroke();
+                // Gate grid
+                ctx.beginPath();
+                ctx.moveTo(w*0.5, h*0.55);
+                ctx.lineTo(w*0.5, h*0.95);
+                ctx.moveTo(w*0.4, h*0.75);
+                ctx.lineTo(w*0.6, h*0.75);
+                ctx.moveTo(w*0.4, h*0.85);
+                ctx.lineTo(w*0.6, h*0.85);
+                ctx.stroke();
+                // Windows
+                ctx.strokeRect(w*0.3, h*0.55, w*0.06, h*0.08);
+                ctx.strokeRect(w*0.64, h*0.55, w*0.06, h*0.08);
+                // Tower windows
+                ctx.beginPath();
+                ctx.arc(w*0.175, h*0.4, w*0.03, 0, Math.PI*2);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(w*0.825, h*0.4, w*0.03, 0, Math.PI*2);
+                ctx.stroke();
+                // Flag
+                ctx.beginPath();
+                ctx.moveTo(w*0.175, h*0.1);
+                ctx.lineTo(w*0.175, h*0.02);
+                ctx.lineTo(w*0.25, h*0.06);
+                ctx.lineTo(w*0.175, h*0.1);
+                ctx.stroke();
+            }},
+            { name: 'Owl', draw: (ctx, w, h) => {
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                // Body
+                ctx.beginPath();
+                ctx.ellipse(w/2, h*0.6, w*0.22, h*0.3, 0, 0, Math.PI*2);
+                ctx.stroke();
+                // Head
+                ctx.beginPath();
+                ctx.arc(w/2, h*0.28, w*0.18, 0, Math.PI*2);
+                ctx.stroke();
+                // Ear tufts
+                ctx.beginPath();
+                ctx.moveTo(w*0.35, h*0.18);
+                ctx.lineTo(w*0.28, h*0.05);
+                ctx.lineTo(w*0.4, h*0.15);
+                ctx.moveTo(w*0.65, h*0.18);
+                ctx.lineTo(w*0.72, h*0.05);
+                ctx.lineTo(w*0.6, h*0.15);
+                ctx.stroke();
+                // Eye circles (large)
+                ctx.beginPath();
+                ctx.arc(w*0.4, h*0.28, w*0.08, 0, Math.PI*2);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(w*0.6, h*0.28, w*0.08, 0, Math.PI*2);
+                ctx.stroke();
+                // Pupils
+                ctx.beginPath();
+                ctx.arc(w*0.4, h*0.28, w*0.03, 0, Math.PI*2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(w*0.6, h*0.28, w*0.03, 0, Math.PI*2);
+                ctx.fill();
+                // Beak
+                ctx.beginPath();
+                ctx.moveTo(w*0.47, h*0.32);
+                ctx.lineTo(w*0.5, h*0.4);
+                ctx.lineTo(w*0.53, h*0.32);
+                ctx.stroke();
+                // Feather pattern on chest
+                for(let row = 0; row < 4; row++) {
+                    for(let col = 0; col < 3 + row; col++) {
+                        const x = w*(0.35 + col*0.08 - row*0.04);
+                        const y = h*(0.5 + row*0.1);
+                        ctx.beginPath();
+                        ctx.arc(x, y, w*0.025, 0, Math.PI);
+                        ctx.stroke();
+                    }
+                }
+                // Wings
+                ctx.beginPath();
+                ctx.ellipse(w*0.25, h*0.6, w*0.06, h*0.2, -0.2, 0, Math.PI*2);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.ellipse(w*0.75, h*0.6, w*0.06, h*0.2, 0.2, 0, Math.PI*2);
+                ctx.stroke();
+                // Feet
+                ctx.beginPath();
+                ctx.moveTo(w*0.4, h*0.88);
+                ctx.lineTo(w*0.35, h*0.95);
+                ctx.moveTo(w*0.4, h*0.88);
+                ctx.lineTo(w*0.4, h*0.95);
+                ctx.moveTo(w*0.4, h*0.88);
+                ctx.lineTo(w*0.45, h*0.95);
+                ctx.moveTo(w*0.6, h*0.88);
+                ctx.lineTo(w*0.55, h*0.95);
+                ctx.moveTo(w*0.6, h*0.88);
+                ctx.lineTo(w*0.6, h*0.95);
+                ctx.moveTo(w*0.6, h*0.88);
+                ctx.lineTo(w*0.65, h*0.95);
+                ctx.stroke();
+            }},
+            { name: 'Ship', draw: (ctx, w, h) => {
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                // Hull
+                ctx.beginPath();
+                ctx.moveTo(w*0.1, h*0.65);
+                ctx.lineTo(w*0.15, h*0.85);
+                ctx.lineTo(w*0.85, h*0.85);
+                ctx.lineTo(w*0.95, h*0.65);
                 ctx.closePath();
                 ctx.stroke();
-                // Wrapper lines
-                for(let i = 1; i < 5; i++) {
+                // Deck line
+                ctx.beginPath();
+                ctx.moveTo(w*0.12, h*0.68);
+                ctx.lineTo(w*0.93, h*0.68);
+                ctx.stroke();
+                // Mast
+                ctx.beginPath();
+                ctx.moveTo(w*0.5, h*0.65);
+                ctx.lineTo(w*0.5, h*0.1);
+                ctx.stroke();
+                // Sails
+                ctx.beginPath();
+                ctx.moveTo(w*0.5, h*0.15);
+                ctx.quadraticCurveTo(w*0.7, h*0.25, w*0.5, h*0.4);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(w*0.5, h*0.42);
+                ctx.quadraticCurveTo(w*0.72, h*0.52, w*0.5, h*0.62);
+                ctx.stroke();
+                // Flag
+                ctx.beginPath();
+                ctx.moveTo(w*0.5, h*0.1);
+                ctx.lineTo(w*0.6, h*0.13);
+                ctx.lineTo(w*0.5, h*0.16);
+                ctx.stroke();
+                // Portholes
+                for(let i = 0; i < 4; i++) {
                     ctx.beginPath();
-                    ctx.moveTo(w*(0.25 + i*0.1), h*0.55);
-                    ctx.lineTo(w*(0.3 + i*0.08), h*0.9);
+                    ctx.arc(w*(0.25 + i*0.15), h*0.75, w*0.025, 0, Math.PI*2);
                     ctx.stroke();
                 }
-                // Frosting (swirl)
+                // Waves
                 ctx.beginPath();
-                ctx.moveTo(w*0.22, h*0.55);
-                ctx.bezierCurveTo(w*0.2, h*0.35, w*0.35, h*0.25, w*0.5, h*0.15);
-                ctx.bezierCurveTo(w*0.65, h*0.25, w*0.8, h*0.35, w*0.78, h*0.55);
-                ctx.stroke();
-                // Cherry on top
-                ctx.beginPath();
-                ctx.arc(w*0.5, h*0.12, w*0.05, 0, Math.PI*2);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(w*0.5, h*0.07);
-                ctx.quadraticCurveTo(w*0.55, h*0.02, w*0.58, h*0.05);
+                for(let x = 0; x < w; x += 30) {
+                    ctx.moveTo(x, h*0.88);
+                    ctx.quadraticCurveTo(x + 15, h*0.85, x + 30, h*0.88);
+                }
                 ctx.stroke();
             }}
         ],
         extreme: [
-            { name: 'Portrait', draw: (ctx, w, h) => {
+            { name: 'Dragon', draw: (ctx, w, h) => {
                 ctx.strokeStyle = '#000';
                 ctx.lineWidth = 2;
-                // Face outline
+                // Body with gradient
+                const bodyGrad = ctx.createLinearGradient(w*0.2, h*0.3, w*0.8, h*0.7);
+                bodyGrad.addColorStop(0, 'rgba(50, 150, 50, 0.3)');
+                bodyGrad.addColorStop(1, 'rgba(20, 80, 20, 0.4)');
+                ctx.fillStyle = bodyGrad;
+                // Main body
                 ctx.beginPath();
-                ctx.ellipse(w/2, h*0.45, w*0.28, h*0.34, 0, 0, Math.PI*2);
+                ctx.ellipse(w*0.5, h*0.55, w*0.25, h*0.18, 0.1, 0, Math.PI*2);
+                ctx.fill();
                 ctx.stroke();
-                // Hair with color
-                ctx.fillStyle = 'rgba(139, 69, 19, 0.3)';
+                // Neck
                 ctx.beginPath();
-                ctx.moveTo(w*0.22, h*0.38);
-                ctx.quadraticCurveTo(w*0.18, h*0.12, w*0.35, h*0.08);
-                ctx.quadraticCurveTo(w/2, h*0.04, w*0.65, h*0.08);
-                ctx.quadraticCurveTo(w*0.82, h*0.12, w*0.78, h*0.38);
-                ctx.lineTo(w*0.78, h*0.5);
-                ctx.quadraticCurveTo(w*0.72, h*0.35, w*0.5, h*0.32);
-                ctx.quadraticCurveTo(w*0.28, h*0.35, w*0.22, h*0.5);
+                ctx.moveTo(w*0.7, h*0.45);
+                ctx.quadraticCurveTo(w*0.8, h*0.3, w*0.75, h*0.2);
+                ctx.quadraticCurveTo(w*0.85, h*0.25, w*0.78, h*0.42);
+                ctx.fill();
+                ctx.stroke();
+                // Head
+                ctx.beginPath();
+                ctx.ellipse(w*0.78, h*0.15, w*0.1, h*0.08, 0.3, 0, Math.PI*2);
+                ctx.fill();
+                ctx.stroke();
+                // Snout
+                ctx.beginPath();
+                ctx.moveTo(w*0.85, h*0.12);
+                ctx.lineTo(w*0.95, h*0.1);
+                ctx.lineTo(w*0.95, h*0.18);
+                ctx.lineTo(w*0.85, h*0.18);
+                ctx.stroke();
+                // Eye
+                ctx.fillStyle = 'rgba(255, 200, 0, 0.6)';
+                ctx.beginPath();
+                ctx.ellipse(w*0.8, h*0.12, w*0.02, h*0.015, 0, 0, Math.PI*2);
+                ctx.fill();
+                ctx.stroke();
+                ctx.fillStyle = '#000';
+                ctx.beginPath();
+                ctx.ellipse(w*0.8, h*0.12, w*0.008, h*0.012, 0, 0, Math.PI*2);
+                ctx.fill();
+                // Horns
+                ctx.beginPath();
+                ctx.moveTo(w*0.72, h*0.1);
+                ctx.lineTo(w*0.68, h*0.02);
+                ctx.moveTo(w*0.77, h*0.08);
+                ctx.lineTo(w*0.75, h*0.01);
+                ctx.stroke();
+                // Wings
+                ctx.fillStyle = 'rgba(100, 180, 100, 0.25)';
+                ctx.beginPath();
+                ctx.moveTo(w*0.45, h*0.45);
+                ctx.lineTo(w*0.2, h*0.15);
+                ctx.lineTo(w*0.15, h*0.3);
+                ctx.lineTo(w*0.25, h*0.35);
+                ctx.lineTo(w*0.1, h*0.4);
+                ctx.lineTo(w*0.3, h*0.5);
                 ctx.closePath();
                 ctx.fill();
                 ctx.stroke();
-                // Eyes
+                // Wing membrane lines
+                ctx.beginPath();
+                ctx.moveTo(w*0.45, h*0.45);
+                ctx.lineTo(w*0.2, h*0.15);
+                ctx.moveTo(w*0.4, h*0.47);
+                ctx.lineTo(w*0.15, h*0.3);
+                ctx.moveTo(w*0.35, h*0.48);
+                ctx.lineTo(w*0.1, h*0.4);
+                ctx.stroke();
+                // Legs
                 ctx.strokeStyle = '#000';
                 ctx.beginPath();
-                ctx.ellipse(w*0.38, h*0.42, w*0.07, h*0.03, 0, 0, Math.PI*2);
-                ctx.ellipse(w*0.62, h*0.42, w*0.07, h*0.03, 0, 0, Math.PI*2);
+                ctx.moveTo(w*0.35, h*0.68);
+                ctx.lineTo(w*0.3, h*0.85);
+                ctx.lineTo(w*0.25, h*0.88);
+                ctx.moveTo(w*0.3, h*0.85);
+                ctx.lineTo(w*0.32, h*0.88);
+                ctx.moveTo(w*0.55, h*0.7);
+                ctx.lineTo(w*0.6, h*0.85);
+                ctx.lineTo(w*0.55, h*0.88);
+                ctx.moveTo(w*0.6, h*0.85);
+                ctx.lineTo(w*0.62, h*0.88);
                 ctx.stroke();
-                // Iris with color
-                ctx.fillStyle = 'rgba(0, 100, 150, 0.5)';
+                // Tail
                 ctx.beginPath();
-                ctx.arc(w*0.38, h*0.42, w*0.03, 0, Math.PI*2);
-                ctx.arc(w*0.62, h*0.42, w*0.03, 0, Math.PI*2);
+                ctx.moveTo(w*0.25, h*0.55);
+                ctx.quadraticCurveTo(w*0.1, h*0.6, w*0.05, h*0.75);
+                ctx.quadraticCurveTo(w*0.08, h*0.8, w*0.12, h*0.72);
+                ctx.stroke();
+                // Spikes along back
+                for(let i = 0; i < 6; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(w*(0.35 + i*0.07), h*(0.4 - i*0.02));
+                    ctx.lineTo(w*(0.38 + i*0.07), h*(0.32 - i*0.02));
+                    ctx.lineTo(w*(0.41 + i*0.07), h*(0.4 - i*0.02));
+                    ctx.stroke();
+                }
+                // Fire breath
+                ctx.fillStyle = 'rgba(255, 100, 0, 0.3)';
+                ctx.beginPath();
+                ctx.moveTo(w*0.95, h*0.14);
+                ctx.quadraticCurveTo(w*1.05, h*0.1, w*1.0, h*0.05);
+                ctx.quadraticCurveTo(w*1.08, h*0.12, w*1.05, h*0.2);
+                ctx.quadraticCurveTo(w*1.0, h*0.16, w*0.95, h*0.18);
+                ctx.closePath();
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(255, 50, 0, 0.5)';
+                ctx.stroke();
+            }},
+            { name: 'Underwater Scene', draw: (ctx, w, h) => {
+                // Water gradient background
+                const waterGrad = ctx.createLinearGradient(0, 0, 0, h);
+                waterGrad.addColorStop(0, 'rgba(0, 150, 200, 0.2)');
+                waterGrad.addColorStop(0.5, 'rgba(0, 100, 180, 0.3)');
+                waterGrad.addColorStop(1, 'rgba(0, 50, 100, 0.4)');
+                ctx.fillStyle = waterGrad;
+                ctx.fillRect(0, 0, w, h);
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                // Coral formations
+                ctx.fillStyle = 'rgba(255, 100, 100, 0.4)';
+                ctx.beginPath();
+                ctx.moveTo(w*0.1, h*0.95);
+                for(let i = 0; i < 5; i++) {
+                    ctx.quadraticCurveTo(w*(0.1 + i*0.03), h*(0.7 - i*0.05), w*(0.12 + i*0.03), h*(0.75 - i*0.03));
+                }
+                ctx.lineTo(w*0.25, h*0.95);
+                ctx.closePath();
                 ctx.fill();
                 ctx.stroke();
-                // Pupils
+                // More coral
+                ctx.fillStyle = 'rgba(255, 150, 50, 0.4)';
+                ctx.beginPath();
+                ctx.moveTo(w*0.75, h*0.95);
+                for(let i = 0; i < 4; i++) {
+                    ctx.lineTo(w*(0.78 + i*0.04), h*(0.65 + (i%2)*0.1));
+                }
+                ctx.lineTo(w*0.92, h*0.95);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                // Fish 1 (detailed)
+                ctx.fillStyle = 'rgba(255, 180, 0, 0.5)';
+                ctx.beginPath();
+                ctx.ellipse(w*0.35, h*0.35, w*0.1, h*0.06, 0, 0, Math.PI*2);
+                ctx.fill();
+                ctx.stroke();
+                // Fish tail
+                ctx.beginPath();
+                ctx.moveTo(w*0.25, h*0.35);
+                ctx.lineTo(w*0.15, h*0.28);
+                ctx.lineTo(w*0.15, h*0.42);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                // Fish fins
+                ctx.beginPath();
+                ctx.moveTo(w*0.35, h*0.29);
+                ctx.lineTo(w*0.38, h*0.2);
+                ctx.lineTo(w*0.4, h*0.29);
+                ctx.stroke();
+                // Fish eye
                 ctx.fillStyle = '#000';
                 ctx.beginPath();
-                ctx.arc(w*0.38, h*0.42, w*0.015, 0, Math.PI*2);
-                ctx.arc(w*0.62, h*0.42, w*0.015, 0, Math.PI*2);
+                ctx.arc(w*0.42, h*0.33, w*0.015, 0, Math.PI*2);
                 ctx.fill();
-                // Eyebrows
-                ctx.lineWidth = 3;
+                // Stripes on fish
                 ctx.beginPath();
-                ctx.moveTo(w*0.3, h*0.36);
-                ctx.quadraticCurveTo(w*0.38, h*0.33, w*0.46, h*0.36);
-                ctx.moveTo(w*0.54, h*0.36);
-                ctx.quadraticCurveTo(w*0.62, h*0.33, w*0.7, h*0.36);
+                ctx.moveTo(w*0.32, h*0.29);
+                ctx.lineTo(w*0.3, h*0.41);
+                ctx.moveTo(w*0.38, h*0.3);
+                ctx.lineTo(w*0.36, h*0.4);
                 ctx.stroke();
-                // Nose
-                ctx.lineWidth = 2;
+                // Jellyfish
+                ctx.fillStyle = 'rgba(200, 100, 255, 0.3)';
                 ctx.beginPath();
-                ctx.moveTo(w/2, h*0.44);
-                ctx.lineTo(w*0.47, h*0.55);
-                ctx.lineTo(w*0.53, h*0.55);
-                ctx.stroke();
-                // Lips with color
-                ctx.fillStyle = 'rgba(200, 100, 100, 0.3)';
-                ctx.beginPath();
-                ctx.moveTo(w*0.38, h*0.64);
-                ctx.quadraticCurveTo(w*0.5, h*0.6, w*0.62, h*0.64);
-                ctx.quadraticCurveTo(w*0.5, h*0.72, w*0.38, h*0.64);
+                ctx.arc(w*0.7, h*0.25, w*0.08, Math.PI, 0);
                 ctx.fill();
                 ctx.stroke();
-                // Skin tone shading
-                ctx.fillStyle = 'rgba(255, 220, 180, 0.2)';
-                ctx.beginPath();
-                ctx.ellipse(w*0.32, h*0.52, w*0.06, h*0.04, 0, 0, Math.PI*2);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.ellipse(w*0.68, h*0.52, w*0.06, h*0.04, 0, 0, Math.PI*2);
-                ctx.fill();
-            }},
-            { name: 'Sunset Beach', draw: (ctx, w, h) => {
-                // Sky gradient
-                const skyGrad = ctx.createLinearGradient(0, 0, 0, h*0.6);
-                skyGrad.addColorStop(0, 'rgba(255, 100, 50, 0.4)');
-                skyGrad.addColorStop(0.5, 'rgba(255, 180, 100, 0.3)');
-                skyGrad.addColorStop(1, 'rgba(255, 220, 150, 0.2)');
-                ctx.fillStyle = skyGrad;
-                ctx.fillRect(0, 0, w, h*0.6);
-                // Sun with glow
-                const sunGrad = ctx.createRadialGradient(w*0.7, h*0.25, 0, w*0.7, h*0.25, w*0.2);
-                sunGrad.addColorStop(0, 'rgba(255, 200, 50, 0.6)');
-                sunGrad.addColorStop(0.5, 'rgba(255, 150, 50, 0.3)');
-                sunGrad.addColorStop(1, 'rgba(255, 100, 50, 0)');
-                ctx.fillStyle = sunGrad;
-                ctx.fillRect(w*0.5, h*0.05, w*0.4, h*0.4);
-                ctx.strokeStyle = '#000';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.arc(w*0.7, h*0.25, w*0.1, 0, Math.PI*2);
-                ctx.stroke();
-                // Water
-                ctx.fillStyle = 'rgba(50, 100, 200, 0.2)';
-                ctx.fillRect(0, h*0.55, w, h*0.2);
-                // Water line
-                ctx.beginPath();
-                ctx.moveTo(0, h*0.55);
-                ctx.lineTo(w, h*0.55);
-                ctx.stroke();
-                // Waves
-                for(let i = 0; i < 3; i++) {
+                // Tentacles
+                for(let i = 0; i < 5; i++) {
                     ctx.beginPath();
-                    ctx.moveTo(0, h*(0.6 + i*0.05));
-                    for(let x = 0; x < w; x += 20) {
-                        ctx.quadraticCurveTo(x + 10, h*(0.58 + i*0.05), x + 20, h*(0.6 + i*0.05));
+                    ctx.moveTo(w*(0.64 + i*0.03), h*0.25);
+                    ctx.quadraticCurveTo(w*(0.62 + i*0.03), h*0.4, w*(0.65 + i*0.03), h*0.5);
+                    ctx.stroke();
+                }
+                // Bubbles
+                for(let i = 0; i < 8; i++) {
+                    const bx = w*(0.2 + Math.random()*0.6);
+                    const by = h*(0.1 + Math.random()*0.7);
+                    const br = w*(0.01 + Math.random()*0.02);
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                    ctx.beginPath();
+                    ctx.arc(bx, by, br, 0, Math.PI*2);
+                    ctx.fill();
+                    ctx.stroke();
+                }
+                // Seaweed
+                ctx.strokeStyle = 'rgba(0, 100, 50, 0.8)';
+                ctx.lineWidth = 3;
+                for(let s = 0; s < 3; s++) {
+                    ctx.beginPath();
+                    ctx.moveTo(w*(0.5 + s*0.08), h*0.95);
+                    for(let i = 0; i < 4; i++) {
+                        ctx.quadraticCurveTo(
+                            w*(0.48 + s*0.08 + (i%2)*0.06),
+                            h*(0.85 - i*0.15),
+                            w*(0.5 + s*0.08),
+                            h*(0.8 - i*0.15)
+                        );
                     }
                     ctx.stroke();
                 }
-                // Sand
-                ctx.fillStyle = 'rgba(220, 180, 120, 0.3)';
-                ctx.fillRect(0, h*0.75, w, h*0.25);
-                // Beach line
-                ctx.beginPath();
-                ctx.moveTo(0, h*0.75);
-                ctx.lineTo(w, h*0.75);
-                ctx.stroke();
-                // Palm tree
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.moveTo(w*0.2, h*0.95);
-                ctx.quadraticCurveTo(w*0.18, h*0.6, w*0.25, h*0.4);
-                ctx.stroke();
-                // Palm leaves
+                // Sandy bottom
+                ctx.fillStyle = 'rgba(220, 200, 150, 0.4)';
+                ctx.fillRect(0, h*0.9, w, h*0.1);
+                ctx.strokeStyle = '#000';
                 ctx.lineWidth = 2;
-                for(let i = 0; i < 5; i++) {
-                    const angle = -Math.PI/2 + (i - 2) * 0.4;
+                ctx.beginPath();
+                ctx.moveTo(0, h*0.9);
+                ctx.lineTo(w, h*0.9);
+                ctx.stroke();
+            }},
+            { name: 'Forest Path', draw: (ctx, w, h) => {
+                // Sky through trees
+                const skyGrad = ctx.createLinearGradient(0, 0, 0, h*0.4);
+                skyGrad.addColorStop(0, 'rgba(135, 200, 250, 0.3)');
+                skyGrad.addColorStop(1, 'rgba(200, 230, 200, 0.2)');
+                ctx.fillStyle = skyGrad;
+                ctx.fillRect(0, 0, w, h*0.5);
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                // Path (perspective)
+                ctx.fillStyle = 'rgba(180, 150, 100, 0.4)';
+                ctx.beginPath();
+                ctx.moveTo(w*0.3, h);
+                ctx.lineTo(w*0.45, h*0.4);
+                ctx.lineTo(w*0.55, h*0.4);
+                ctx.lineTo(w*0.7, h);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                // Trees on left
+                for(let i = 0; i < 3; i++) {
+                    const tx = w*(0.05 + i*0.08);
+                    const scale = 1 - i*0.15;
+                    // Trunk
+                    ctx.fillStyle = 'rgba(100, 70, 40, 0.5)';
+                    ctx.fillRect(tx, h*(0.3 + i*0.1), w*0.04*scale, h*0.5*scale);
+                    ctx.strokeRect(tx, h*(0.3 + i*0.1), w*0.04*scale, h*0.5*scale);
+                    // Foliage layers
+                    ctx.fillStyle = 'rgba(30, 100, 30, 0.4)';
+                    for(let layer = 0; layer < 3; layer++) {
+                        ctx.beginPath();
+                        ctx.moveTo(tx + w*0.02*scale, h*(0.15 + i*0.1 + layer*0.08));
+                        ctx.lineTo(tx - w*0.06*scale + layer*w*0.02, h*(0.35 + i*0.1 + layer*0.08));
+                        ctx.lineTo(tx + w*0.1*scale - layer*w*0.02, h*(0.35 + i*0.1 + layer*0.08));
+                        ctx.closePath();
+                        ctx.fill();
+                        ctx.stroke();
+                    }
+                }
+                // Trees on right
+                for(let i = 0; i < 3; i++) {
+                    const tx = w*(0.82 - i*0.08);
+                    const scale = 1 - i*0.15;
+                    ctx.fillStyle = 'rgba(100, 70, 40, 0.5)';
+                    ctx.fillRect(tx, h*(0.3 + i*0.1), w*0.04*scale, h*0.5*scale);
+                    ctx.strokeRect(tx, h*(0.3 + i*0.1), w*0.04*scale, h*0.5*scale);
+                    ctx.fillStyle = 'rgba(30, 100, 30, 0.4)';
+                    for(let layer = 0; layer < 3; layer++) {
+                        ctx.beginPath();
+                        ctx.moveTo(tx + w*0.02*scale, h*(0.15 + i*0.1 + layer*0.08));
+                        ctx.lineTo(tx - w*0.06*scale + layer*w*0.02, h*(0.35 + i*0.1 + layer*0.08));
+                        ctx.lineTo(tx + w*0.1*scale - layer*w*0.02, h*(0.35 + i*0.1 + layer*0.08));
+                        ctx.closePath();
+                        ctx.fill();
+                        ctx.stroke();
+                    }
+                }
+                // Sun rays through trees
+                ctx.strokeStyle = 'rgba(255, 255, 200, 0.3)';
+                ctx.lineWidth = 8;
+                ctx.beginPath();
+                ctx.moveTo(w*0.5, h*0.1);
+                ctx.lineTo(w*0.3, h*0.6);
+                ctx.moveTo(w*0.5, h*0.1);
+                ctx.lineTo(w*0.5, h*0.5);
+                ctx.moveTo(w*0.5, h*0.1);
+                ctx.lineTo(w*0.7, h*0.6);
+                ctx.stroke();
+                // Grass/undergrowth
+                ctx.strokeStyle = 'rgba(50, 120, 50, 0.6)';
+                ctx.lineWidth = 2;
+                for(let i = 0; i < 20; i++) {
+                    const gx = w*(0.05 + Math.random()*0.2);
                     ctx.beginPath();
-                    ctx.moveTo(w*0.25, h*0.4);
-                    ctx.quadraticCurveTo(
-                        w*0.25 + Math.cos(angle)*w*0.15,
-                        h*0.4 + Math.sin(angle)*h*0.1,
-                        w*0.25 + Math.cos(angle)*w*0.2,
-                        h*0.4 + Math.sin(angle)*h*0.15 + 0.05*h
-                    );
+                    ctx.moveTo(gx, h*0.95);
+                    ctx.lineTo(gx + w*0.02, h*(0.85 + Math.random()*0.05));
                     ctx.stroke();
                 }
+                for(let i = 0; i < 20; i++) {
+                    const gx = w*(0.75 + Math.random()*0.2);
+                    ctx.beginPath();
+                    ctx.moveTo(gx, h*0.95);
+                    ctx.lineTo(gx - w*0.02, h*(0.85 + Math.random()*0.05));
+                    ctx.stroke();
+                }
+                // Mushrooms on path edge
+                ctx.fillStyle = 'rgba(200, 50, 50, 0.5)';
+                ctx.beginPath();
+                ctx.arc(w*0.32, h*0.85, w*0.025, Math.PI, 0);
+                ctx.fill();
+                ctx.stroke();
+                ctx.fillStyle = 'rgba(240, 230, 200, 0.6)';
+                ctx.fillRect(w*0.315, h*0.85, w*0.01, h*0.04);
+                ctx.strokeRect(w*0.315, h*0.85, w*0.01, h*0.04);
+                // White spots on mushroom
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.arc(w*0.31, h*0.82, w*0.005, 0, Math.PI*2);
+                ctx.arc(w*0.33, h*0.83, w*0.004, 0, Math.PI*2);
+                ctx.fill();
             }}
         ]
     },

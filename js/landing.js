@@ -55,63 +55,29 @@ const Landing = {
         // Clear canvas
         ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Cover the entire canvas - crop to fill
+        // Fill entire screen with the image - scale to cover
+        // Calculate scaling to cover the entire canvas
         const canvasRatio = this.canvas.width / this.canvas.height;
         const imgRatio = img.width / img.height;
 
         let drawWidth, drawHeight, drawX, drawY;
 
         if (canvasRatio > imgRatio) {
-            // Canvas is wider - fit to width, crop top/bottom
+            // Canvas is wider - fit to width
             drawWidth = this.canvas.width;
             drawHeight = this.canvas.width / imgRatio;
             drawX = 0;
             drawY = (this.canvas.height - drawHeight) / 2;
         } else {
-            // Canvas is taller - fit to height, crop left/right
+            // Canvas is taller - fit to height
             drawHeight = this.canvas.height;
             drawWidth = this.canvas.height * imgRatio;
             drawX = (this.canvas.width - drawWidth) / 2;
             drawY = 0;
         }
 
-        // Draw the image to cover the entire canvas
+        // Draw the image centered and covering the entire canvas
         ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
-
-        // Draw a subtle heart frame around where the title would be
-        this.drawHeartFrame(this.canvas.width / 2, this.canvas.height / 2 - 130, 120);
-    },
-
-    drawHeartFrame(x, y, size) {
-        this.ctx.save();
-
-        this.ctx.shadowColor = '#ff6b9d';
-        this.ctx.shadowBlur = 30;
-        this.ctx.strokeStyle = '#ff6b9d';
-        this.ctx.lineWidth = 3;
-
-        this.ctx.beginPath();
-        this.ctx.moveTo(x, y + size * 0.3);
-
-        this.ctx.bezierCurveTo(
-            x - size * 0.5, y - size * 0.3,
-            x - size, y + size * 0.3,
-            x, y + size
-        );
-
-        this.ctx.bezierCurveTo(
-            x + size, y + size * 0.3,
-            x + size * 0.5, y - size * 0.3,
-            x, y + size * 0.3
-        );
-
-        this.ctx.stroke();
-
-        this.ctx.shadowBlur = 50;
-        this.ctx.strokeStyle = 'rgba(255, 107, 157, 0.5)';
-        this.ctx.stroke();
-
-        this.ctx.restore();
     },
 
     destroy() {

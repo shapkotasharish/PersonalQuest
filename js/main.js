@@ -98,9 +98,6 @@ const App = {
             case 'maze':
                 MazeActivity.init(container);
                 break;
-            case 'rhythm':
-                RhythmActivity.init(container);
-                break;
             default:
                 container.innerHTML = '<p>Activity not found</p>';
         }
@@ -119,9 +116,6 @@ const App = {
                 break;
             case 'maze':
                 MazeActivity.cleanup();
-                break;
-            case 'rhythm':
-                RhythmActivity.cleanup();
                 break;
         }
         this.currentActivity = null;
@@ -148,7 +142,7 @@ const App = {
     // Utility: Get completion percentage
     getCompletionPercentage() {
         const completed = Object.values(GameState.activities).filter(a => a.completed).length;
-        return (completed / 5) * 100;
+        return (completed / 4) * 100;
     }
 };
 

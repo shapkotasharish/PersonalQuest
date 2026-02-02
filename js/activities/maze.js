@@ -619,7 +619,8 @@ const MazeActivity = {
             const dy = player.y - memory.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
 
-            if (dist < 35) {
+            // Reduced collision radius - must actually touch the memory
+            if (dist < 18) {
                 this.collectMemory(index);
             }
         });
