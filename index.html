@@ -32,7 +32,7 @@
                     <div class="progress-bar">
                         <div class="progress-fill" id="progress-fill"></div>
                     </div>
-                    <span class="progress-count" id="progress-count">0/20 pieces</span>
+                    <span class="progress-count" id="progress-count">0/25 pieces</span>
                 </div>
             </div>
             <ul class="activity-list">
@@ -50,6 +50,10 @@
                 </li>
                 <li data-activity="maze" class="activity-item">
                     <span class="activity-name">Memory Lane Maze</span>
+                    <span class="activity-status"></span>
+                </li>
+                <li data-activity="karaoke" class="activity-item">
+                    <span class="activity-name">Our Songs (Karaoke)</span>
                     <span class="activity-status"></span>
                 </li>
                 <li data-activity="puzzle" class="activity-item puzzle-btn">
@@ -71,7 +75,7 @@
     <div id="puzzle-page" class="page">
         <button id="puzzle-back-btn" class="back-button">Back</button>
         <div class="puzzle-container">
-            <h2 class="puzzle-title">Puzzle Progress: <span id="puzzle-progress">0</span>/20</h2>
+            <h2 class="puzzle-title">Puzzle Progress: <span id="puzzle-progress">0</span>/25</h2>
             <div id="puzzle-frame" class="puzzle-frame"></div>
             <div id="piece-collection" class="piece-collection">
                 <h3>Available Pieces</h3>
@@ -113,6 +117,7 @@
     <script src="js/activities/constellation.js"></script>
     <script src="js/activities/garden.js"></script>
     <script src="js/activities/maze.js"></script>
+    <script src="js/activities/karaoke.js"></script>
     <script src="js/puzzle.js"></script>
     <script src="js/finale.js"></script>
     <script src="js/main.js"></script>

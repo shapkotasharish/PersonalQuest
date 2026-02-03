@@ -1,4 +1,4 @@
-// Puzzle System - Simple grid with even sides (5 columns x 4 rows = 20 pieces)
+// Puzzle System - Simple grid with even sides (5 columns x 5 rows = 25 pieces)
 const PuzzleSystem = {
     puzzleImage: 'assets/images/puzzle/main.jpg',
     pieces: [],
@@ -8,9 +8,9 @@ const PuzzleSystem = {
     imageLoaded: false,
     loadedImage: null,
 
-    // Grid dimensions - 5 columns x 4 rows = 20 pieces
+    // Grid dimensions - 5 columns x 5 rows = 25 pieces
     gridCols: 5,
-    gridRows: 4,
+    gridRows: 5,
     pieceWidth: 0,
     pieceHeight: 0,
 
@@ -58,7 +58,7 @@ const PuzzleSystem = {
         frame.innerHTML = '';
         this.slots = [];
 
-        // Style the frame - 5 columns x 4 rows
+        // Style the frame - 5 columns x 5 rows
         const frameWidth = Math.min(500, window.innerWidth - 100);
         const frameHeight = frameWidth * (this.gridRows / this.gridCols);
         frame.style.width = frameWidth + 'px';

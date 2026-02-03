@@ -4,13 +4,14 @@ const GameState = {
         drawing: { completed: false, data: null },
         constellation: { completed: false, data: null },
         garden: { completed: false, data: null },
-        maze: { completed: false, data: null }
+        maze: { completed: false, data: null },
+        karaoke: { completed: false, songsPlayed: [], data: null }
     },
     puzzle: {
         collected: 0,
         unlocked: [], // Array of unlocked piece indices
         placed: [],
-        total: 20
+        total: 25 // 5 activities × 5 pieces = 25 (5x5 grid)
     },
     finaleReached: false,
 
@@ -29,7 +30,16 @@ const GameState = {
         if (saved) {
             const data = JSON.parse(saved);
             this.activities = data.activities || this.activities;
+            // Ensure karaoke activity exists (migration)
+            if (!this.activities.karaoke) {
+                this.activities.karaoke = { completed: false, songsPlayed: [], data: null };
+            }
+            if (!this.activities.karaoke.songsPlayed) {
+                this.activities.karaoke.songsPlayed = [];
+            }
             this.puzzle = data.puzzle || this.puzzle;
+            // Update total for new 5x5 grid
+            this.puzzle.total = 25;
             // Handle migration from old format without unlocked array
             if (!this.puzzle.unlocked) {
                 this.puzzle.unlocked = [];
@@ -44,13 +54,18 @@ const GameState = {
         }
     },
 
-    // Mark activity as complete and award pieces
+    // Mark activity as complete and award pieces (for non-karaoke activities)
     completeActivity(activityName) {
+        if (activityName === 'karaoke') {
+            // Karaoke is handled by playSong method
+            return false;
+        }
+
         if (!this.activities[activityName].completed) {
             this.activities[activityName].completed = true;
 
             // Unlock 5 random pieces that haven't been unlocked yet
-            const allPieces = Array.from({ length: 25 }, (_, i) => i);
+            const allPieces = Array.from({ length: this.puzzle.total }, (_, i) => i);
             const availablePieces = allPieces.filter(p => !this.puzzle.unlocked.includes(p));
 
             // Shuffle and take up to 5
@@ -68,6 +83,34 @@ const GameState = {
             return true;
         }
         return false;
+    },
+
+    // Play a song in karaoke mode - awards 1 puzzle piece per new song
+    playSong(songId) {
+        if (!this.activities.karaoke.songsPlayed.includes(songId)) {
+            this.activities.karaoke.songsPlayed.push(songId);
+
+            // Award 1 puzzle piece
+            const allPieces = Array.from({ length: this.puzzle.total }, (_, i) => i);
+            const availablePieces = allPieces.filter(p => !this.puzzle.unlocked.includes(p));
+
+            if (availablePieces.length > 0) {
+                // Pick a random available piece
+                const randomIndex = Math.floor(Math.random() * availablePieces.length);
+                this.puzzle.unlocked.push(availablePieces[randomIndex]);
+                this.puzzle.collected = this.puzzle.unlocked.length;
+            }
+
+            // Mark karaoke as completed if all 5 songs have been played
+            if (this.activities.karaoke.songsPlayed.length >= 5) {
+                this.activities.karaoke.completed = true;
+            }
+
+            this.save();
+            this.updateUI();
+            return true; // New song was played
+        }
+        return false; // Song was already played
     },
 
     // Place a puzzle piece
@@ -117,13 +160,14 @@ const GameState = {
             drawing: { completed: false, data: null },
             constellation: { completed: false, data: null },
             garden: { completed: false, data: null },
-            maze: { completed: false, data: null }
+            maze: { completed: false, data: null },
+            karaoke: { completed: false, songsPlayed: [], data: null }
         };
         this.puzzle = {
             collected: 0,
             unlocked: [],
             placed: [],
-            total: 20
+            total: 25
         };
         this.finaleReached = false;
         this.save();

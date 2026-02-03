@@ -1,4 +1,4 @@
-// Landing Page - Simple Image Background
+// Landing Page - Full Screen Willow Tree Background
 const Landing = {
     canvas: null,
     ctx: null,
@@ -33,6 +33,7 @@ const Landing = {
     },
 
     resize() {
+        // Use the full viewport dimensions
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
     },
@@ -47,36 +48,38 @@ const Landing = {
     },
 
     draw() {
+        const ctx = this.ctx;
+
+        // Always fill with a dark background first to prevent any white space
+        ctx.fillStyle = '#1a0a2e';
+        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
         if (!this.treeImageLoaded) return;
 
-        const ctx = this.ctx;
         const img = this.treeImage;
 
-        // Clear canvas
-        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-        // Fill entire screen with the image - scale to cover
-        // Calculate scaling to cover the entire canvas
+        // COVER mode: Scale image to completely cover the canvas (no empty space)
+        // This means the image will be cropped if aspect ratios don't match
         const canvasRatio = this.canvas.width / this.canvas.height;
         const imgRatio = img.width / img.height;
 
         let drawWidth, drawHeight, drawX, drawY;
 
         if (canvasRatio > imgRatio) {
-            // Canvas is wider - fit to width
+            // Canvas is wider than image - fit to width, crop top/bottom
             drawWidth = this.canvas.width;
             drawHeight = this.canvas.width / imgRatio;
-            drawX = 0;
-            drawY = (this.canvas.height - drawHeight) / 2;
         } else {
-            // Canvas is taller - fit to height
+            // Canvas is taller than image - fit to height, crop left/right
             drawHeight = this.canvas.height;
             drawWidth = this.canvas.height * imgRatio;
-            drawX = (this.canvas.width - drawWidth) / 2;
-            drawY = 0;
         }
 
-        // Draw the image centered and covering the entire canvas
+        // Center the image
+        drawX = (this.canvas.width - drawWidth) / 2;
+        drawY = (this.canvas.height - drawHeight) / 2;
+
+        // Draw the image covering the entire canvas
         ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
     },
 
